@@ -14,13 +14,39 @@ using std::ofstream;
 
 
 
+//declare the uniform distribution, rd for use globally
+std::uniform_real_distribution<float> uni(0.,1.000000);
+std::random_device rd;
+
+//call by reference for vector v to fill with new values of nk space with the new values from uniform (0,1)
+void NKspacevals_gen(vector<float>& v,int n){
+	for (int i=0;i<n;++i)
+		{
+			v[i]=uni(rd);
+			uni.reset();
+		}
+};
+
+//call by reference for vector v to normalize so one value is exactly 1 and 0
+void NKspacevals_unit(vector<float>& v,int n){
+	vector<float>::iterator maxresult;
+	vector<float>::iterator minresult;
+	maxresult = max_element(v.begin(), v.end());
+	minresult = min_element(v.begin(), v.end());
+	v[int(distance(v.begin(), minresult))]=float(0.000);
+	cout << "max element at: " << float(distance(v.begin(), maxresult))<<endl;
+	//cout << "min element at: " << float(distance(v.begin(), minresult))<<endl;
+	for (int i = 0; i < n; ++i)
+		{	
+			v[i]=v[i]/v[float(distance(v.begin(), maxresult))];
+		}
+};
+
 int main(){
 cout.setf(std::ios::fixed);
 cout.setf(std::ios::showpoint);
 cout.precision(20);
-
-
-//length of element for vectors and initializing each one a string of 0,1, length of 20
+//length of element for vector 
 int n=pow(2,20);
 vector<float> v(n);
 // creating and save strings to file
@@ -31,7 +57,19 @@ for (int s=0; s<n;++s)
 			strings<<std::bitset< 20 >(s).to_string()<<endl;
 		}
 strings.close();
-
+for (int j = 0; j < 1; ++j)
+{
+	NKspacevals_gen(v,n);
+	NKspacevals_unit(v,n);
+	//saving NKscores to unique files
+	ofstream scores;
+	scores.open("NKspace_scores_"+to_string(j)+".txt");
+		for (int i = 0; i <n; i++)
+		{
+			scores<<"\t"<<v[i]<<endl;
+		}
+	scores.close();
+}
 
 return 0;
 }
