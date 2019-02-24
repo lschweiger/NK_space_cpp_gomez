@@ -56,22 +56,22 @@ if (!file.is_open())
 {
 	// creating and save strings to file
 	cout<<"does not exists"<<endl;
-	fstream strings;
+	std::ofstream strings;
 	strings.open("NKspace_strings.txt");
 	for (int s=0; s<n;++s)
 			{
-				//strings<<std::bitset< 20 >(s).to_string()<<endl;
+				strings<<std::bitset< 20 >(s).to_string()<<endl;
 
 			}
 	strings.close();
 }
 
 //creating and saving scores j<# is the number to of spaces to create
-for (int j = 0; j < 10; ++j)
+for (int j = 0; j < 1000; ++j)
 {
 	NKspacevals_gen(v,n);
 	NKspacevals_unit(v,n);
-	//saving NKscores to unique files
+	//saving NKscores to unique files using fstream instead of ofstream due to writing speeds being faster
 	fstream scores;
 	scores.open("NKspace_scores_"+to_string(j)+".txt");
 		for (int i = 0; i <n; i++)
