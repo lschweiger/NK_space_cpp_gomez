@@ -7,7 +7,7 @@ using std::string;
 using std::vector;
 #include <bitset> //convert numbers to binary 
 #include <fstream> //writing nk space string and values to file
-using std::ofstream;
+using std::fstream;
 #include <cmath> // pow function
 #include <random> // needed for random seed
 #include <algorithm>//needed for min/max_element
@@ -56,11 +56,12 @@ if (!file.is_open())
 {
 	// creating and save strings to file
 	cout<<"does not exists"<<endl;
-	ofstream strings;
+	fstream strings;
 	strings.open("NKspace_strings.txt");
 	for (int s=0; s<n;++s)
 			{
-				strings<<std::bitset< 20 >(s).to_string()<<endl;
+				//strings<<std::bitset< 20 >(s).to_string()<<endl;
+
 			}
 	strings.close();
 }
@@ -71,7 +72,7 @@ for (int j = 0; j < 10; ++j)
 	NKspacevals_gen(v,n);
 	NKspacevals_unit(v,n);
 	//saving NKscores to unique files
-	ofstream scores;
+	fstream scores;
 	scores.open("NKspace_scores_"+to_string(j)+".txt");
 		for (int i = 0; i <n; i++)
 		{
