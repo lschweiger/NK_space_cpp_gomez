@@ -7,7 +7,7 @@ using std::string;
 using std::vector;
 #include <bitset> //convert numbers to binary 
 #include <fstream> //writing nk space string and values to file
-using std::fstream;
+using std::ofstream;
 #include <cmath> // pow function
 #include <random> // needed for random seed
 #include <algorithm>//needed for min/max_element
@@ -56,7 +56,7 @@ if (!file.is_open())
 {
 	// creating and save strings to file
 	cout<<"does not exists"<<endl;
-	std::ofstream strings;
+	ofstream strings;
 	strings.open("NKspace_strings.txt");
 	for (int s=0; s<n;++s)
 			{
@@ -66,20 +66,26 @@ if (!file.is_open())
 	strings.close();
 }
 
-//creating and saving scores j<# is the number to of spaces to create
-for (int j = 0; j < 1000; ++j)
+//creating and saving scores j<# is the number of spaces to create
+for (int j = 0; j < 10; ++j)
 {
 	NKspacevals_gen(v,n);
 	NKspacevals_unit(v,n);
-	//saving NKscores to unique files using fstream instead of ofstream due to writing speeds being faster
-	fstream scores;
-	scores.open("NKspace_scores_"+to_string(j)+".txt");
-		for (int i = 0; i <n; i++)
+	//saving NKscores to unique files using fstream instead of ofstream due to writing speeds being faster with std::ios_base::out creating 1000 now takes approx 470 seconds 
+	std::fstream scores;
+	scores.open("NKspace_scores_"+to_string(j)+".txt",std::ios::out);
+		for (vector<float>::iterator i = v.begin(); i != v.end(); ++i) //switched to vector iterator
 		{
-			scores<< std::fixed << std::setprecision(6)<<v[i]<<endl;
+
+			scores<< std::fixed << std::setprecision(17)<<*i<<"\n";
+			
 		}
+	//scores.flush();
 	scores.close();
 }
+
+
+
 
 return 0;
 }
