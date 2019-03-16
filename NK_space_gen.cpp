@@ -15,7 +15,9 @@ using std::ofstream;
 #include <iomanip>
 
 //declare the uniform distribution, rd for use globally
-std::uniform_real_distribution<float> uni(0.1,1.000000);
+double num=240;
+double sigma=sqrt(1/num);
+std::normal_distribution<double> uni(0.5,sigma);
 std::random_device rd;
 
 //call by reference for vector v to fill with new values of nk space with the new values from uniform (0,1)
@@ -24,6 +26,7 @@ void NKspacevals_gen(vector<float>& input_vec,int n){
 		{
 			input_vec[i]=uni(rd);
 			uni.reset();
+			cout<<uni(rd)<<endl;
 		}
 };
 
