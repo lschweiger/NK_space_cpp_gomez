@@ -26,7 +26,7 @@ void NKspacevals_gen(vector<float>& input_vec,int n){
 		{
 			input_vec[i]=uni(rd);
 			uni.reset();
-			cout<<uni(rd)<<endl;
+			//cout<<uni(rd)<<endl;
 		}
 };
 
