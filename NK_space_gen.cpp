@@ -91,7 +91,7 @@ void NKspacevals_unit(vector<double>& input_vec,int n){
 	vector<double>::iterator minresult;
 	maxresult = max_element(input_vec.begin(), input_vec.end());
 	minresult = min_element(input_vec.begin(), input_vec.end());
-	input_vec[int(distance(input_vec.begin(), minresult))]=float(0.000);
+	//input_vec[int(distance(input_vec.begin(), minresult))]=float(0.000);
 	//cout << "max element at: " << int(distance(input_vec.begin(), maxresult))<<endl;
 	//cout << "min element at: " << int(distance(input_vec.begin(), minresult))<<endl;
 	
@@ -110,13 +110,13 @@ cout.precision(15);
 vector<double> v(nk);
 //will check if NKspace_strings exists if so skips straight to NKspace_scores creation otherwise creates it
 std::fstream file;
-file.open("NKspace_strings.txt", std::ios_base::out | std::ios_base::in);
+file.open("NK_space_strings.txt", std::ios_base::out | std::ios_base::in);
 if (!file.is_open())
 {
 	// creating and save strings to file
 	cout<<"does not exists"<<endl;
 	ofstream strings;
-	strings.open("NKspace_strings.txt");
+	strings.open("NK_space_strings.txt");
 	for (int s=0; s<nk;++s)
 			{
 				strings<<std::bitset< 20 >(s).to_string()<<endl;
@@ -133,7 +133,7 @@ for (int j = 0; j < 10; ++j)
 	NKspacevals_unit(v,::nk);
 	//saving NKscores to unique files using fstream instead of ofstream due to writing speeds being faster with std::ios_base::out creating 1000 now takes approx 470 seconds 
 	std::fstream scores;
-	scores.open("NKspace_scores_"+to_string(j)+".txt",std::ios::out);
+	scores.open("NK_space_scores_"+to_string(j)+".txt",std::ios::out);
 		for (vector<double>::iterator i = v.begin(); i != v.end(); ++i) //switched to vector iterator
 		{
 
