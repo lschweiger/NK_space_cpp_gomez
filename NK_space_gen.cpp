@@ -144,8 +144,8 @@ for (int j = 0; j < 10; ++j)
 	scores.close();
 	cout<<"done"<<endl;
 }
-
-
+std::string command = "./compress.py";
+ system("./compress.py");
 
 
 return 0;
