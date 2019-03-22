@@ -10,7 +10,7 @@ using std::vector;
 #include <bitset> //binary to numbers
 #include <cmath>
 #include <random>
-//#include <thread>
+#include <thread>
 int n=pow(2,20);
 const int nbgh=100;
 const int agentcount=100;
@@ -108,15 +108,83 @@ public:
 	};
 
 	void agentswap(Agent& input_agent){
-		//checks flag and swaps scores and string for next round if 1, and resets back to 0 for next round
+		//checks flag and swaps scores and string, for next round if 1, and resets back to 0 for next round
 		if(input_agent.flag==1)
-		{;
-			input_agent.score=input_agent.tempscore;
-			input_agent.binarystring=input_agent.tempstring;
+		{
+			double temp=input_agent.tempscore;
+			string stemp=input_agent.tempstring;
+			input_agent.tempscore=input_agent.score;
+			input_agent.tempstring=input_agent.binarystring;
+			input_agent.score=temp;
+			input_agent.binarystring=stemp;
 			input_agent.flag=0;
 		}
 	};
+	void agentexplore(Agent& input_agent,std::pair <vector<string>,vector<double>> pair){
+		// if agent whith flag -1 will explore
+		std::vector<int> v(3);
+		std::default_random_engine generator;
+  		std::uniform_int_distribution<int> dist(0,19);
+  		//checks if flag is really -1
+		if (input_agent.flag==-1){
+			//keeps running until flag is not -1
+			while(input_agent.flag==-1){
 
+ 				srand(time(0));
+ 				for (int i = 0; i < 3; i++)
+ 				{
+ 					
+ 					v[i]=rand()%20;
+ 					dist.reset();
+ 					while(i>0&&v[i-1]==v[i]) {
+ 						v[i]=dist(generator);
+ 						//cout<<v[i]<<endl;
+ 						dist.reset();
+ 					}
+ 					
+ 				}
+				string tempstring=input_agent.binarystring;
+				if(tempstring[v[0]]=='1'){
+					tempstring[v[0]]='0';
+				}
+				else{
+					tempstring[v[0]]='1';
+				}
+				if(tempstring[v[1]]=='1'){
+					tempstring[v[1]]='0';
+				}
+				else{
+					tempstring[v[1]]='1';
+				}
+				if(tempstring[v[2]]=='1'){
+					tempstring[v[2]]='0';
+				}
+				else{
+					tempstring[v[2]]='1';
+				}
+				std::bitset<20> newid=std::bitset<20>(tempstring);
+				// if new string and score are better assigns them to agent
+				if(pair.second[newid.to_ulong()]>input_agent.score){
+					input_agent.score=pair.second[newid.to_ulong()];
+					input_agent.binarystring=tempstring;
+					input_agent.flag=2; // should be set to 0, after testing is done
+				}
+			}
+			
+		}
+	};
+};
+// added threading to speed up the agent explore
+void threads(int a,int b,vector<Agent>& agent_array,std::pair<vector<string>,vector<double>> NKspace){
+	for (int i = a; i < b; i++)
+	{
+		if(agent_array[i].flag==-1){
+		agent_array[i].agentexplore(agent_array[i],NKspace);
+		//agent_array[i].agentexplore(agent_array[i],NKspace);
+		//cout<<agent_array[i].id<<" id \t"<<agent_array[i].score<<" \033[1;31mnew_score\033[0m "<<agent_array[i].tempscore<<" \033[1;32mold_score\033[0m "<<"\n";
+		//cout<<agent_array[i].binarystring<<" \033[1;34mnew_string\033[0m "<<agent_array[i].tempstring<<" \033[1;33mold_string\033[0m "<<"\n";		
+		}
+	}
 };
 
 
@@ -131,9 +199,7 @@ open_space_scores(0,NKspacescore);
 open_space_string(NKspacevals);
 // placing both vectors into a pair
 std::pair <vector<string>,vector<double>> NKspace(NKspacevals,NKspacescore);
-cout<<NKspace.first[0]<<endl;
-cout<<NKspace.second[0]<<endl;
-//srand (5); start from 1
+srand (1); //start from 1
 
 for (int i = 0; i < ::agentcount; ++i)
 {
@@ -144,43 +210,33 @@ for (int i = 0; i < ::agentcount; ++i)
 //agent_array[0].agentswap(agent_array[0]);
 for (int i = 0; i < ::agentcount; i++)
 {
+
 	agent_array[i].agentexploit(agent_array[i],agent_array[agent_array[i].connections[0]],agent_array[agent_array[i].connections[1]],agent_array[agent_array[i].connections[2]],agent_array[agent_array[i].connections[3]]);
+
 }
-cout<<agent_array[99].id<<"\t id \t"<<agent_array[99].score<<" score \t"<<agent_array[99].binarystring<<"  before \n";
-cout<<agent_array[99].binarystring<<" string "<<"\n";
-cout<<agent_array[98].id<<"\t id \t"<<agent_array[98].score<<" score \t"<<agent_array[98].binarystring<<" before \n";
-cout<<agent_array[98].binarystring<<" string "<<"\n";
-cout<<agent_array[0].id<<"\t id \t"<<agent_array[0].score<<" score \t"<<agent_array[0].binarystring<<"  before \n";
-cout<<agent_array[0].binarystring<<" string "<<"\n";
-cout<<agent_array[1].id<<"\t id \t"<<agent_array[1].score<<" score \t"<<agent_array[1].binarystring<<" before \n";
-cout<<agent_array[1].binarystring<<" string "<<"\n";
-cout<<agent_array[2].id<<"\t id \t"<<agent_array[2].score<<" score \t"<<agent_array[2].binarystring<<" before \n";
-cout<<agent_array[2].binarystring<<" string "<<"\n";
-cout<<agent_array[3].id<<"\t id \t"<<agent_array[3].score<<" score \t"<<agent_array[3].binarystring<<" before \n";
-cout<<agent_array[3].binarystring<<" string "<<"\n";
-cout<<agent_array[4].id<<"\t id \t"<<agent_array[4].score<<" score \t"<<agent_array[4].binarystring<<" before \n";
-cout<<agent_array[4].binarystring<<" string "<<"\n";
-//
+
 for (int i = 0; i < ::agentcount; i++)
 {
-	//agent_array[i].agentexploit(agent_array[i],agent_array[agent_array[i].connections[0]],agent_array[agent_array[i].connections[1]],agent_array[agent_array[i].connections[2]],agent_array[agent_array[i].connections[3]]);
 	agent_array[i].agentswap(agent_array[i]);
+	cout<<agent_array[i].id<<" id \t"<<agent_array[i].score<<" \033[1;31mnew_score\033[0m "<<agent_array[i].tempscore<<" \033[1;32mold_score\033[0m "<<"\n";
+	cout<<agent_array[i].binarystring<<" \033[1;34mnew_string\033[0m "<<agent_array[i].tempstring<<" \033[1;33mold_string\033[0m "<<"\n";
 }
-cout<<agent_array[99].id<<"\t id \t"<<agent_array[99].score<<" score \t"<<agent_array[99].binarystring<<"  before \n";
-cout<<agent_array[99].binarystring<<" string "<<"\n";
-cout<<agent_array[98].id<<"\t id \t"<<agent_array[98].score<<" score \t"<<agent_array[98].binarystring<<" before \n";
-cout<<agent_array[98].binarystring<<" string "<<"\n";
-cout<<agent_array[0].id<<"\t id \t"<<agent_array[0].score<<" score \t"<<agent_array[0].binarystring<<"  before \n";
-cout<<agent_array[0].binarystring<<" string "<<"\n";
-cout<<agent_array[1].id<<"\t id \t"<<agent_array[1].score<<" score \t"<<agent_array[1].binarystring<<" before \n";
-cout<<agent_array[1].binarystring<<" string "<<"\n";
-cout<<agent_array[2].id<<"\t id \t"<<agent_array[2].score<<" score \t"<<agent_array[2].binarystring<<" before \n";
-cout<<agent_array[2].binarystring<<" string "<<"\n";
-cout<<agent_array[3].id<<"\t id \t"<<agent_array[3].score<<" score \t"<<agent_array[3].binarystring<<" before \n";
-cout<<agent_array[3].binarystring<<" string "<<"\n";
-cout<<agent_array[4].id<<"\t id \t"<<agent_array[4].score<<" score \t"<<agent_array[4].binarystring<<" before \n";
-cout<<agent_array[4].binarystring<<" string "<<"\n";
-cout<<rand()%(::n)<<endl;
-cout<<rand()%(::n)<<endl;
+
+cout<<"threads"<<endl;
+std::thread t1(threads,0,50,std::ref(agent_array),NKspace);
+std::thread t2(threads,50,100,std::ref(agent_array),NKspace);
+t1.join();
+t2.join();
+cout<<"threads"<<endl;
+for(int i=0; i<100;i++){
+	if(agent_array[i].flag==2){
+		cout<<agent_array[i].id<<endl;
+		agent_array[i].agentexplore(agent_array[i],NKspace);
+		cout<<agent_array[i].id<<" id \t"<<agent_array[i].score<<" \033[1;31mnew_score\033[0m "<<agent_array[i].tempscore<<" \033[1;32mold_score\033[0m "<<"\n";
+		cout<<agent_array[i].binarystring<<" \033[1;34mnew_string\033[0m "<<agent_array[i].tempstring<<" \033[1;33mold_string\033[0m "<<"\n";
+	}
+	//agent_array[0].flag=-1;
+}
+
 return 0;
 }
