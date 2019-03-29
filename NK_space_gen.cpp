@@ -125,16 +125,16 @@ if (!file.is_open())
 	strings.close();
 }
 
-
+int loop=10;
 //creating and saving scores j<# is the number of spaces to create
-for (int j = 0; j < 10; ++j)
+for (int j = 0; j < loop; ++j)
 {
 	NKspacevals_gen(v);
 	NKspacevals_unit(v,::nk);
 	//saving NKscores to unique files using fstream instead of ofstream due to writing speeds being faster with std::ios_base::out creating 1000 now takes approx 470 seconds 
 	std::fstream scores;
 	scores.open("NK_space_scores_"+to_string(j)+".txt",std::ios::out);
-		for (vector<double>::iterator i = v.begin(); i != v.end(); ++i) //switched to vector iterator
+		for (vector<double>::iterator i = v.begin(); i != v.end(); i++) //switched to vector iterator
 		{
 
 			scores<< std::fixed << std::setprecision(15)<<*i<<"\n";
@@ -144,8 +144,9 @@ for (int j = 0; j < 10; ++j)
 	scores.close();
 	cout<<"done"<<endl;
 }
-std::string command = "./compress.py";
- system("./compress.py");
+//std::string command = "./compress.py";
+string python="./compress.py -N " + to_string(loop);
+system(python.c_str());
 
 
 return 0;
