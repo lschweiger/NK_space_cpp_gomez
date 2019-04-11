@@ -125,7 +125,7 @@ if (!file.is_open())
 	strings.close();
 }
 
-int loop=10;
+int loop=1000;
 //creating and saving scores j<# is the number of spaces to create
 for (int j = 0; j < loop; ++j)
 {
