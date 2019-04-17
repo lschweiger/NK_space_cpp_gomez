@@ -284,7 +284,7 @@ void threads(int a,int b,vector<Agent>& agent_array,std::pair<vector<string>,vec
 };
 */
 
-void output(vector<Agent> &Agents,int rounds){
+void output(vector<Agent> &Agents,int rounds){ //outputs all agents connections as a csv file
 	std::ofstream out;
 	out.open("agent connections "+to_string(rounds)+".txt");
 	out<<"Agent id #"<<","<<"connection 0"<<","<<"connection 1"<<","<<"connection 2"<<","<<"connection 3"<<","<<"connection 4"<<","<<"connection 5"<<","<<"connection 6"<<","<<"connection 7"<<","<<"minority status"<<"\n";
