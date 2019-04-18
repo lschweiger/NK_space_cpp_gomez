@@ -78,7 +78,7 @@ public:
     string tempstring;        //stores temp string if agent exploits
     double score;            //stores primary score
     double tempscore;        //stores temp score if agent exploits
-    int connections[8];        //array of connections will be filled by agentconnections
+    vector<int> connections=vector<int>(8);        //array of connections will be filled by agentconnections
     //flag is use in swap and exploit
 
     void agent_connections(int num, Agent &input_agent) {
@@ -221,12 +221,14 @@ public:
         }
     };
     void agent_minority_swap(int num,Agent &input_agent,Agent a, Agent b, Agent c, Agent d, Agent e, Agent f, Agent g, Agent h){
+    	// swaps agent that is in minority; by go one connection through i.e agent 98 will have the potential to get agents 90 through 6's connections
+    	// will randomly only get 8 from the 16.
         if(input_agent.minority==1) {
             srand(num);
             vector<int> temp(64);
             vector<int> newcons(8);
             int rdm=0;
-            for(int i=0;i<8;i++){
+            for(int i=0;i<8;i++){// fills temp with all possible connections including duplicates, will also fill temp up simultaneously from the other 8 agents
                 temp[i]=a.connections[i];
                 //cout<<a.id<<"id "<<a.connections[i]<<" a con"<<endl;
                 temp[8+i]=b.connections[i];
@@ -238,23 +240,27 @@ public:
                 temp[48+i]=g.connections[i];
                 temp[56+i]=h.connections[i];
             }
+
+            
+            //sorts temp and removes duplicate values to create a vector
             sort(temp.begin(), temp.end());
             auto last = std::unique(temp.begin(), temp.end());
             temp.erase(last, temp.end());
             // cout << input_agent.id << " id " << endl;
             for (int i =0; i<8;i++) {
                // cout<<i<<endl;
-                std::uniform_int_distribution<> rands(0, (8-i));
+                std::uniform_int_distribution<> rands(0, (temp.size()-i-1));
        			std::random_device rdm;
       			int random = rands(rdm);
       			
-      			while(temp[random]==input_agent.id){
-      				std::uniform_int_distribution<> rands(0, (8-i));
+      			while(temp[random]==input_agent.id){// prevents the agent from getting itself as possible connections
+      				std::uniform_int_distribution<> rands(0, (temp.size()-i-1));
       				random = rands(rdm);
       			}
                 newcons[i] = temp[random];
                 //cout<<newcons[i]<<" ";
                 temp.erase(temp.begin()+random);
+                temp.resize(temp.size());
             }
             //cout<<endl;
             //cout<<"new"<<endl;
@@ -263,8 +269,8 @@ public:
                 //cout<<newcons[j]<<"new con"<<endl;
                 input_agent.connections[j]=newcons[j];
             }
-            
-        }
+            sort(input_agent.connections.begin(), input_agent.connections.end());
+        }//when down resets flag back to 0, regardless of status
         input_agent.minority=0;
     };
 };
@@ -284,7 +290,7 @@ void threads(int a,int b,vector<Agent>& agent_array,std::pair<vector<string>,vec
 };
 */
 
-void output(vector<Agent> &Agents,int rounds){ //outputs all agents connections as a csv file
+void output(vector<Agent> &Agents,int rounds){ //outputs all agents connections as a csv file; includes minority status
 	std::ofstream out;
 	out.open("agent connections "+to_string(rounds)+".txt");
 	out<<"Agent id #"<<","<<"connection 0"<<","<<"connection 1"<<","<<"connection 2"<<","<<"connection 3"<<","<<"connection 4"<<","<<"connection 5"<<","<<"connection 6"<<","<<"connection 7"<<","<<"minority status"<<"\n";
@@ -339,7 +345,7 @@ int main(int argc, char *argv[]) {
         nums++;
     }
     for (int rounds = 0; rounds < 100; rounds++) {
-    	
+    	//cout<<rounds<<endl;
         mcount = 0;
         for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); i++) {
 
@@ -353,7 +359,7 @@ int main(int argc, char *argv[]) {
                 mcount++;
             }
         }
-        output(agent_array,rounds);
+        /*output(agent_array,rounds);*/
         mcount = mcount / 100;
         //cout<<mcount<<endl;
         minoritycount[rounds] = mcount;
@@ -379,13 +385,13 @@ int main(int argc, char *argv[]) {
                                        agent_array[i->connections[4]], agent_array[i->connections[5]],
                                        agent_array[i->connections[6]], agent_array[i->connections[7]]);
                 /*cout<<i->id<<"id"<<endl;
-                cout<<i->connections[0]<<endl;
-                cout<<i->connections[1]<<endl;
-                cout<<i->connections[2]<<endl;
-                cout<<i->connections[3]<<endl;
-                cout<<i->connections[4]<<endl;
-                cout<<i->connections[5]<<endl;
-                cout<<i->connections[6]<<endl;
+                cout<<i->connections[0]<<" ";
+                cout<<i->connections[1]<<" ";
+                cout<<i->connections[2]<<" ";
+                cout<<i->connections[3]<<" ";
+                cout<<i->connections[4]<<" ";
+                cout<<i->connections[5]<<" ";
+                cout<<i->connections[6]<<" ";
                 cout<<i->connections[7]<<endl;*/
             }
         }
@@ -409,7 +415,7 @@ int main(int argc, char *argv[]) {
         avgscores[rounds] = (avgscore / (::agentcount));
         
     }
-    for (int i = 0; i < maxscore.size(); i++) {
+    for (int i = 0; i < 100; i++) {
         cout << maxscore[i] << " \033[1;31mmax score for round\033[0m " << i << endl;
         cout << avgscores[i] << " \033[1;32mavg score for round\033[0m " << i << "\n";
         cout << minoritycount[i] << " \033[1;34mminority count for round\033[0m " << i << "\n";
