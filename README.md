@@ -1,13 +1,13 @@
-
 # Agent based model
 
 Research for prof Charles Gomez.
 
 # WIP
 
-currently NK space generatation is mostly complete and,
+Currently NK space generation is mostly complete and,
 action_space; the basics are done, will need to add to the class structure and add more functions.
 
+**Warning: running `./NK_space_gen` will create 1000 spaces with a total the size of about 19GB**
 # To compile just run (on Linux and mac)
 
 `g++ NK_space_gen.cpp -o NK_space_gen` and<br /> 
