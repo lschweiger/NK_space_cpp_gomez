@@ -209,7 +209,6 @@ public:
             sort(temp.begin(), temp.end());
             auto last = std::unique(temp.begin(), temp.end());
             temp.erase(last, temp.end());
-            cout<<input_agent.id<<" id\n";
             for (int i = 0; i < 4; ++i)
             {
                 std::uniform_int_distribution<> rands(0, (temp.size()-1));
@@ -218,7 +217,7 @@ public:
                 while(temp[random]==input_agent.id){// prevents the agent from getting itself as possible connections
                     std::uniform_int_distribution<> rands(0, (temp.size()-1));
                     random = rands(rdm);
-                    cout<<random<<" "<<temp.size()<<" size"<<endl;
+                    //cout<<random<<" "<<temp.size()<<" size"<<endl;
                 }
                 newcons[i] = temp[random];
                 if(temp.size()>3){
@@ -226,11 +225,6 @@ public:
                 temp.resize(temp.size());
                 }
             }
-            for (std::vector<int>::iterator i = newcons.begin(); i != newcons.end(); ++i)
-            {
-                cout<<*i<<" ";
-            }
-            cout<<endl;
             for (int j = 0; j < 4; j++)
             {
                 input_agent.connections[j]=newcons[j];
@@ -316,7 +310,7 @@ int main(int argc, char *argv[]) {
     vector<double> minoritycount(100);
     vector<double> avgscores(100);
     vector<char> type(::agentcount);
-    AB_list_seg(type);
+    AB_list(type);
 
 // placing both vectors into a pair
     //std::pair <vector<string>, vector<double>> NKspace(NKspacevals, NKspacescore);
@@ -346,7 +340,7 @@ for(NKspace_num;NKspace_num<end;NKspace_num++){
     	eq=0.0;
     	max=0.0;
 	}
-	AB_list_seg(type);
+	AB_list(type);
 	open_space_scores(NKspace_num, NKspacescore);
     for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); i++) {
 
