@@ -5,7 +5,7 @@ import glob
 from matplotlib.ticker import FuncFormatter, MaxNLocator 
 import numpy as np 
   
-list=glob.glob("NK_space_[0-9]*.txt") 
+list=glob.glob("*NK_space_[0-9]*.txt") 
 for i in list: 
 	df=pd.read_csv(i) 
 	rounds=df["round"].tolist() 
