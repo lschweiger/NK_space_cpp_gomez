@@ -1,5 +1,5 @@
-NK_space*.txt
-NK_space*.bz2
+*NK_space*.txt
+*NK_space*.bz2
 *connections*.txt
 *.png
 *.zip
