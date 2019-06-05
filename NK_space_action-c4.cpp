@@ -67,6 +67,21 @@ void AB_list(vector<char> &types){//creates list of A and B and randomly assigns
     }
 };
 
+void AB_list_deseg(vector<char> &types){//creates list of A and B and randomly assigns one to an agent at the beginning of every new NK_Space
+    vector<char> AB(::agentcount);
+    for (int i = 0; i < ::agentcount; ++i) {
+        if (i%2==0) types[i] = 'A';
+        if (i%2==1) types[i] = 'B';
+    }
+};
+
+void AB_list_seg(vector<char> &types){//creates list of A and B and randomly assigns one to an agent at the beginning of every new NK_Space
+    vector<char> AB(::agentcount);
+    for (int i = 0; i < ::agentcount; ++i) {
+        if (i < 50) types[i] = 'A';
+        if (i >= 50) types[i] = 'B';
+    }
+};
 
 class Agent // class for agents; includes variable and functions.
 {
@@ -165,11 +180,8 @@ public:
         }
     };
 
-    void agent_explore(Agent &input_agent, vector<string> &istring, vector<double> &val) {
-        // if agent with flag -1 will explore
-
-        //int random=rand()%20;
-        std::uniform_int_distribution<> randm(0, 19);
+void agent_explore_A(Agent &input_agent, vector<string> &istring, vector<double> &val){
+        std::uniform_int_distribution<> randm(0, 9);
         std::random_device rdm;
         int random = randm(rdm);
         //cout<<random<<endl;
@@ -192,6 +204,39 @@ public:
             // sets to 0 when done, for testing use another number, after testing is done set to 0
             input_agent.flag = 0;
         }
+    };
+        void agent_explore_B(Agent &input_agent, vector<string> &istring, vector<double> &val){
+        std::uniform_int_distribution<> randm(10, 19);
+        std::random_device rdm;
+        int random = randm(rdm);
+        //cout<<random<<endl;
+        //checks if flag is really -1
+        if (input_agent.flag == -1) {
+            //keeps running until flag is not -1
+            string temstring = input_agent.binarystring;
+            if (temstring[random] == '1') {
+                temstring[random] = '0';
+            } else {
+                temstring[random] = '1';
+            }
+            std::bitset<20> newidbinary = std::bitset<20>(temstring);
+            int newid=newidbinary.to_ulong();
+            // if new string and score are better assigns them to agent
+            if (input_agent.score < val[newid]) {
+                input_agent.score = val[newid];
+                input_agent.binarystring = temstring;
+            }
+            // sets to 0 when done, for testing use another number, after testing is done set to 0
+            input_agent.flag = 0;
+        }
+    };
+    
+    void agent_explore(Agent &input_agent, vector<string> &istring, vector<double> &val) {
+        // if agent with flag -1 will explore
+
+        if(input_agent.species=='A') agent_explore_A(input_agent,istring,val);
+        if(input_agent.species=='B') agent_explore_A(input_agent,istring,val);
+        
     };
     void agent_minority_swap(int num,Agent &input_agent,Agent a, Agent b, Agent c, Agent d){
     	// swaps agent that is in minority; by go one connection through i.e agent 98 will have the potential to get agents 90 through 6's connections
@@ -262,27 +307,11 @@ void output_connections(vector<Agent> &Agents,int rounds){ //outputs all agents 
 	}
 };
 
-void output_round(int NKspace,int round,vector<int> &rounds,vector<double> &scr,vector<double> &ag,vector<double> mc){
-	std::ofstream out("4c-NK_space_"+to_string(NKspace)+".txt");
-	out<<"round,"<<"max score,"<<"avg score,"<<"minority count"<<"\n";
-	for (int i=0;i<round; i++){
-		out<<std::setprecision(15)<<rounds[i]<<","<<scr[i]<<","<<ag[i]<<","<<std::setprecision(15)<<mc[i]<<"\n";
-	}
-};
-
-void AB_list_deseg(vector<char> &types){//creates list of A and B and randomly assigns one to an agent at the beginning of every new NK_Space
-    vector<char> AB(::agentcount);
-    for (int i = 0; i < ::agentcount; ++i) {
-        if (i%2==0) types[i] = 'A';
-        if (i%2==1) types[i] = 'B';
-    }
-};
-
-void AB_list_seg(vector<char> &types){//creates list of A and B and randomly assigns one to an agent at the beginning of every new NK_Space
-    vector<char> AB(::agentcount);
-    for (int i = 0; i < ::agentcount; ++i) {
-        if (i < 50) types[i] = 'A';
-        if (i >= 50) types[i] = 'B';
+void output_round(int NKspace,int round,vector<int> rounds,vector<double> scr,vector<double> ag,vector<double> mc,vector<int> us,vector<double> pu){
+    std::ofstream out("4c-NK_space_"+to_string(NKspace)+".txt");
+    out<<"round,"<<"max score,"<<"avg score,"<<"Number of unique solutions,"<<"percent with max score,"<<"minority count"<<"\n";
+    for (int i=0;i<round; i++){
+        out<<std::setprecision(15)<<rounds[i]<<","<<scr[i]<<","<<ag[i]<<","<<us[i]<<","<<pu[i]<<","<<std::setprecision(15)<<mc[i]<<"\n";
     }
 };
 
@@ -305,11 +334,15 @@ int main(int argc, char *argv[]) {
     double max = 0.0;
     double eq=0.0;
     double avgscore = 0.0;
+    int unisize=0;
+    int percuni=0;
     vector<double> maxscore(100);
     vector<int> maxround(100);
     vector<double> minoritycount(100);
     vector<double> avgscores(100);
     vector<char> type(::agentcount);
+    vector<int> uniquesize(100);
+    vector<double> percentuni(100);
     AB_list(type);
 
 // placing both vectors into a pair
@@ -327,6 +360,8 @@ for(NKspace_num;NKspace_num<end;NKspace_num++){
 		minoritycount.clear();
 		avgscores.clear();
 		type.clear();
+        uniquesize.clear();
+        percentuni.clear();
 		agent_array.resize(100);
 		NKspacescore.resize(100);
 		maxscore.resize(100);
@@ -334,6 +369,10 @@ for(NKspace_num;NKspace_num<end;NKspace_num++){
 		minoritycount.resize(100);
 		avgscores.resize(100);
 		type.resize(100);
+        uniquesize.resize(100);
+        percentuni.resize(100);
+        percuni=0;
+        unisize=0;
 		rounds = 0;
     	nums = 0;
     	mcount=0;
@@ -353,6 +392,35 @@ for(NKspace_num;NKspace_num<end;NKspace_num++){
         nums++;
     }
     for (rounds; rounds < 100; rounds++) {
+        unisize=1;
+        string binstr=agent_array[0].binarystring;
+        for (int i=1; i<::agentcount;i++){
+            if(binstr!=agent_array[i].binarystring){
+                unisize++;
+                binstr=agent_array[i].binarystring;
+            }
+            //if(i==99 && unisize==0) unisize=1;
+        }
+        uniquesize[rounds]=unisize;
+        max=0;
+        for (int i = 0; i < ::agentcount; i++) {
+            //cout<<agent_array[i].score<<endl;
+            if (max < agent_array[i].score) {
+                max = agent_array[i].score;
+            }
+
+        }
+        cout<<"round #"<<rounds<<endl;
+        percuni=0;
+        for (int i = 0; i < 100; ++i)
+        {
+            if(max==agent_array[i].score){
+                percuni++;
+                //cout<<percuni<<" ";
+            }
+
+        }
+        percentuni[rounds]=(percuni);
     	cout<<"round #"<<rounds<<endl;
         mcount = 0;
         for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); i++) {
@@ -418,17 +486,9 @@ for(NKspace_num;NKspace_num<end;NKspace_num++){
         }
         avgscores[rounds] = (avgscore / (::agentcount));
         int eqflag=0;
-    	if(fabs((avgscore/100.0)-eq)<pow(10,-14) && rounds>=15){
+    	if(fabs((avgscore/100.0)-eq)<pow(10,-14) && rounds>=50){
     		//cout<<fabs((avgscore/100.0)-eq)<<"fabs"<<endl;
     		eqflag=1;
-    	}
-    	else{
-    		//cout<<pow(10,-14)<<endl;
-    		//cout<<eq<<"eq"<<endl;
-    		//cout<<fabs((avgscore/100.0)-eq)<<endl;
-    		//eq=avgscore/100.0;
-    		//cout<<avgscore/100.0<<endl;
-    		
     	}	
     	if(eqflag==1){cout<<"ending"<<endl;break;}
     }
@@ -437,7 +497,7 @@ for(NKspace_num;NKspace_num<end;NKspace_num++){
         cout << avgscores[i] << " \033[1;32mavg score for round\033[0m " << i << "\n";
         cout << minoritycount[i] << " \033[1;34mminority count for round\033[0m " << i << "\n";
     }*/
-    output_round(NKspace_num,rounds,maxround,maxscore,avgscores,minoritycount);
+    output_round(NKspace_num,rounds,maxround,maxscore,avgscores,minoritycount,uniquesize,percentuni);
 }
     return 0;
 }
