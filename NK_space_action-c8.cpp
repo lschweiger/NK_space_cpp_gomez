@@ -269,7 +269,8 @@ public:
             input_agent.flag = 0;
         }
     };
-        void agent_explore_B(Agent &input_agent, vector<string> &istring, vector<double> &val){
+
+    void agent_explore_B(Agent &input_agent, vector<string> &istring, vector<double> &val){
         std::uniform_int_distribution<> randm(4, 7);
         std::random_device rdm;
         int random = randm(rdm);
@@ -295,7 +296,7 @@ public:
         }
     };
 
-        void agent_explore_C(Agent &input_agent, vector<string> &istring, vector<double> &val){
+    void agent_explore_C(Agent &input_agent, vector<string> &istring, vector<double> &val){
         std::uniform_int_distribution<> randm(8, 11);
         std::random_device rdm;
         int random = randm(rdm);
@@ -321,7 +322,7 @@ public:
         }
     };
 
-        void agent_explore_D(Agent &input_agent, vector<string> &istring, vector<double> &val){
+    void agent_explore_D(Agent &input_agent, vector<string> &istring, vector<double> &val){
         std::uniform_int_distribution<> randm(12, 15);
         std::random_device rdm;
         int random = randm(rdm);
@@ -347,7 +348,7 @@ public:
         }
     };
 
-        void agent_explore_E(Agent &input_agent, vector<string> &istring, vector<double> &val){
+    void agent_explore_E(Agent &input_agent, vector<string> &istring, vector<double> &val){
         std::uniform_int_distribution<> randm(16, 19);
         std::random_device rdm;
         int random = randm(rdm);
@@ -486,10 +487,11 @@ public:
     void agent_swap_con(vector<Agent> Agents,Agent &input_agent,Agent a, Agent b, Agent c, Agent d, Agent e, Agent f, Agent g, Agent h){
         matrix_fill_before(input_agent.id,input_agent.connections);
         vector<int> new_cons;
+        cout<<input_agent.id<<" here \n";
         for(int i=0;new_cons.size()<8;i++)
         {
 
-            vector<int> pool=pool_con(input_agent,a,b,c,d,e,f,g,h);
+            //vector<int> pool=pool_con(input_agent,a,b,c,d,e,f,g,h);
             vector<int> old_cons=input_agent.connections;
             vector<int> potential;
             bool found=false;
@@ -513,12 +515,13 @@ public:
             vector<int> C_cons=Agents[C].connections; // assigns the picked agent's connections to C_cons and filters and removes common elements from C_con and potential
             std::set_difference(C_cons.begin(), C_cons.end(), old_cons.begin(), old_cons.end(), std::inserter(potential, potential.begin()));
             potential.erase(std::remove(potential.begin(), potential.end(), input_agent.id), potential.end());
-            /*cout<<"potential"<<endl;
-            for (int i = 0; i < potential.size(); ++i)
+            //cout<<"potential"<<" size "<<potential.size()<<endl;
+            /*for (int i = 0; i < potential.size(); ++i)
             {
                cout<<potential[i]<<"\t";
-            }*/
-            //cout<<endl;
+            }
+            cout<<endl;
+            */
             std::uniform_int_distribution<> Drands(0, potential.size()-1);
             std::random_device Drdm;
             int D=Drands(Drdm);
@@ -540,15 +543,16 @@ public:
         */
         cout<<"info \n";
             matrix_fill_after(input_agent.id,new_cons);
-            if (input_agent.id==0||input_agent.id==1||input_agent.id==2||input_agent.id==99)
+            if (input_agent.id==0||input_agent.id==1||input_agent.id==2||input_agent.id==84||input_agent.id==99)
             {
                 matrix_print();
             }
+            cout<<"here\n";
             for (int i = 0; i < new_cons.size(); ++i)
             {// assigns new connection to agent's temp and call connection swap after.
                 input_agent.tempconnections[i]=new_cons[i];
             }
-            connection_swap(input_agent);
+            //connection_swap(input_agent);
     };
 
     void matrix_fill_before(int id,vector<int> filler)
@@ -783,7 +787,7 @@ for(NKspace_num;NKspace_num<end;NKspace_num++){
         for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); i++) {
             //if (i->minority == 1) {
                 cout<<i->id<<" id \n";
-                if(i->id==0)i->connections={(1+i->id)%(100),(3+i->id)%(100),(5+i->id)%(100),(7+i->id)%(100),(11+i->id)%(100),(13+i->id)%(100),(17+i->id)%(100),(19+i->id)%(100)};
+                //if(i->id==0)i->connections={(1+i->id)%(100),(3+i->id)%(100),(5+i->id)%(100),(7+i->id)%(100),(11+i->id)%(100),(13+i->id)%(100),(17+i->id)%(100),(19+i->id)%(100)};
                 i->agent_swap_con(agent_array,*i,
                                        agent_array[i->connections[0]],agent_array[i->connections[1]],
                                        agent_array[i->connections[2]], agent_array[i->connections[3]],
