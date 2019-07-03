@@ -480,78 +480,134 @@ public:
         sort(temp.begin(), temp.end());
         auto last = std::unique(temp.begin(), temp.end());
         temp.erase(last, temp.end());
+        temp.resize(temp.size());
     return temp;
     };
 
 
-    void agent_swap_con(vector<Agent> Agents,Agent &input_agent,Agent a, Agent b, Agent c, Agent d, Agent e, Agent f, Agent g, Agent h){
-        matrix_fill_before(input_agent.id,input_agent.connections);
-        vector<int> new_cons;
-        cout<<input_agent.id<<" here \n";
-        for(int i=0;new_cons.size()<8;i++)
-        {
-
-            //vector<int> pool=pool_con(input_agent,a,b,c,d,e,f,g,h);
-            vector<int> old_cons=input_agent.connections;
-            vector<int> potential;
-            bool found=false;
-            std::uniform_int_distribution<> Brands(0, old_cons.size()-1);
-            std::random_device Brdm;
-            std::uniform_int_distribution<> Crands(0, old_cons.size()-1);
-            std::random_device Crdm;
-            int B=old_cons[i];
-            int C=old_cons[Crands(Crdm)];
-            while(C==B&&found==true) {// check if C==B are equal and that C is not connected to B
-                for (auto & elem : Agents[B].connections)
+    void agent_swap_con(vector<Agent> &Agents,Agent &input_agent,Agent a, Agent b, Agent c, Agent d, Agent e, Agent f, Agent g, Agent h){
+        //matrix_fill_before(input_agent.id,input_agent.connections);
+        std::default_random_engine generator (2);
+        int A=input_agent.id; //input agent named A 
+        std::uniform_int_distribution<> selected(0, input_agent.connections.size()-1); //random selction for B
+        std::random_device Srdm;
+        vector<int> pool=pool_con(input_agent,a,b,c,d,e,f,g,h); //set of all 1st degree connected agents that we pick C* from
+        vector<int> old_cons=input_agent.connections;
+        vector<int> C_potential;
+        vector<int> D_potential;
+        int B=old_cons[selected(generator)];
+        for(int i=0;i<pool.size();i++){ //find and only adds agents for C* from the pool that are not connected to A
+            bool found = false;
+            for (auto & elem : Agents[pool[i]].connections)
+                if (elem == A)
+                {
+                    found = true;
+                    break;
+                }
+                if(found==true) continue;
+                if(found==false)
                     {
-                    if (elem == C)
-                        {
-                            found = true;
-                            break;
-                        }
+                        C_potential.push_back(pool[i]);
                     }
-                C=old_cons[Crands(Crdm)];
-            }
-            vector<int> C_cons=Agents[C].connections; // assigns the picked agent's connections to C_cons and filters and removes common elements from C_con and potential
-            std::set_difference(C_cons.begin(), C_cons.end(), old_cons.begin(), old_cons.end(), std::inserter(potential, potential.begin()));
-            potential.erase(std::remove(potential.begin(), potential.end(), input_agent.id), potential.end());
-            //cout<<"potential"<<" size "<<potential.size()<<endl;
-            /*for (int i = 0; i < potential.size(); ++i)
-            {
-               cout<<potential[i]<<"\t";
-            }
-            cout<<endl;
-            */
-            std::uniform_int_distribution<> Drands(0, potential.size()-1);
-            std::random_device Drdm;
-            int D=Drands(Drdm);
-            //cout<<"random pick"<<D<<" value of D in potential "<<potential[D]<<endl;
-
-            new_cons.push_back(potential[D]); //adds new connection to new_cons and checks that it is unique
-            sort(new_cons.begin(), new_cons.end());
-            auto last1 = std::unique(new_cons.begin(), new_cons.end());
-            new_cons.erase(last1, new_cons.end());
-
         }
-        /*cout<<" new cons"<<endl;
-        for (int i = 0; i < new_cons.size(); ++i)
+        //cout<<C_potential.size()<<" test 1"<<endl;
+        std::uniform_int_distribution<> c_sel(0,C_potential.size()-1); //random selection of C* from C_potential.
+        std::random_device Crdm;
+        int C=C_potential[c_sel(generator)];
+        vector<int> C_cons=Agents[C].connections;
+
+        for(int i=0;i<C_cons.size();i++){ // find and only adds agents for D* from the C* that are not connected to B or A
+            bool found = false;
+            for (auto & elem : Agents[C_cons[i]].connections)
+                if (elem == B || elem==A)
+                {
+                    found = true;
+                    break;
+                }
+                if(found==true) continue;
+                if(found==false)
+                    {
+                        D_potential.push_back(C_cons[i]);
+                    }
+        }
+
+        cout<<D_potential.size()<<" test 2"<<endl;
+        std::uniform_int_distribution<> d_sel(0,D_potential.size()-1);
+        std::random_device Drdm;
+        int D=D_potential[d_sel(generator)];
+        while(D==C) D=D_potential[d_sel(generator)];
+        /*
+        cout<<"before\n";
+        cout<<Agents[A].id<<endl;
+        for (int i = 0; i < 8; ++i)
         {
-            cout<<new_cons[i]<<"\t";
+            cout<<Agents[A].connections[i]<<" ";
         }
         cout<<endl;
-        cout<<" size of new "<<new_cons.size()<<endl;
+        cout<<Agents[B].id<<endl;
+                for (int i = 0; i < 8; ++i)
+        {
+            cout<<Agents[B].connections[i]<<" ";
+        }
+        cout<<endl;
+        cout<<Agents[C].id<<endl;
+                for (int i = 0; i < 8; ++i)
+        {
+            cout<<Agents[C].connections[i]<<" ";
+        }
+        cout<<endl;
+        cout<<Agents[D].id<<endl;
+                for (int i = 0; i < 8; ++i)
+        {
+            cout<<Agents[D].connections[i]<<" ";
+        }
+        cout<<endl;
         */
+        std::vector<int>::iterator ABit = std::find(Agents[A].connections.begin(), Agents[A].connections.end(), B);
+        int ABindex = std::distance(Agents[A].connections.begin(), ABit);
+        cout<<Agents[A].connections[ABindex];
+        std::vector<int>::iterator BAit = std::find(Agents[B].connections.begin(), Agents[B].connections.end(), A);
+        int BAindex = std::distance(Agents[B].connections.begin(), BAit);
+        cout<<Agents[B].connections[BAindex];
+        std::vector<int>::iterator CDit = std::find(Agents[C].connections.begin(), Agents[C].connections.end(), D);
+        int CDindex = std::distance(Agents[C].connections.begin(), CDit); 
+        cout<<Agents[C].connections[CDindex];
+        std::vector<int>::iterator DCit = std::find(Agents[D].connections.begin(), Agents[D].connections.end(), C);
+        int DCindex = std::distance(Agents[D].connections.begin(), DCit);
+        cout<<Agents[D].connections[DCindex];
+        Agents[A].connections[ABindex]=C;
+        Agents[B].connections[BAindex]=D;
+        Agents[C].connections[CDindex]=A;
+        Agents[D].connections[DCindex]=B;
+        /*
+        cout<<"\n after\n";
+                for (int i = 0; i < 8; ++i)
+        {
+            cout<<Agents[A].connections[i]<<" ";
+        }
+        cout<<endl;
+                for (int i = 0; i < 8; ++i)
+        {
+            cout<<Agents[B].connections[i]<<" ";
+        }
+        cout<<endl;
+                for (int i = 0; i < 8; ++i)
+        {
+            cout<<Agents[C].connections[i]<<" ";
+        }
+        cout<<endl;
+                for (int i = 0; i < 8; ++i)
+        {
+            cout<<Agents[D].connections[i]<<" ";
+        }
+        cout<<endl;
+        */
+        std::sort(Agents[A].connections.begin(),Agents[A].connections.end());
+        std::sort(Agents[B].connections.begin(),Agents[B].connections.end());
+        std::sort(Agents[C].connections.begin(),Agents[C].connections.end());
+        std::sort(Agents[D].connections.begin(),Agents[D].connections.end());
         cout<<"info \n";
-            matrix_fill_after(input_agent.id,new_cons);
-            if (input_agent.id==0||input_agent.id==1||input_agent.id==2||input_agent.id==84||input_agent.id==99)
-            {
-                matrix_print();
-            }
-            cout<<"here\n";
-            for (int i = 0; i < new_cons.size(); ++i)
-            {// assigns new connection to agent's temp and call connection swap after.
-                input_agent.tempconnections[i]=new_cons[i];
-            }
+            //matrix_fill_after(input_agent.id,new_cons);            
             //connection_swap(input_agent);
     };
 
@@ -572,18 +628,32 @@ public:
                 ::matrix[filler[i]][id]=5;
             }
         };
-    void matrix_print(void)
+    void matrix_print(vector<Agent> agent_array)
     {//prints and counts new connections,
+        for(int i=0;i<100;i++)
+        {
+            for (int j = 0; j < 100; j++)
+            {
+                for (int k = 0; k < agent_array[i].connections.size(); k++)
+                {
+                    if(agent_array[i].connections[k]==j)
+                    {
+                        ::matrix[i][agent_array[i].connections[k]]=5;
+                    }
+                }
+                
+            }
+            
+        }
         for (int i = 0; i < 100; ++i)
         {
             int count=0;
             for (int j = 0; j < 100; ++j)
             {
-                if (::matrix[i][j]==5) count++;
+                if(::matrix[i][j]==5) count++;
                 cout<<::matrix[i][j];
-
             }
-            cout<<" num "<<count<<endl;
+            cout<<" num "<<count<<" "<<i<<endl;
         }
     };
 };
@@ -720,7 +790,7 @@ for(NKspace_num;NKspace_num<end;NKspace_num++){
         nums++;
     }
 
-    for (rounds; rounds < 1; rounds++) {
+    for (rounds; rounds < 100; rounds++) {
         unisize=1;
         string binstr=agent_array[0].binarystring;
         for (int i=1; i<::agentcount;i++){
@@ -785,7 +855,7 @@ for(NKspace_num;NKspace_num<end;NKspace_num++){
         }
         //swap_agents(agent_array);
         for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); i++) {
-            //if (i->minority == 1) {
+            if (i->minority == 1) {
                 cout<<i->id<<" id \n";
                 //if(i->id==0)i->connections={(1+i->id)%(100),(3+i->id)%(100),(5+i->id)%(100),(7+i->id)%(100),(11+i->id)%(100),(13+i->id)%(100),(17+i->id)%(100),(19+i->id)%(100)};
                 i->agent_swap_con(agent_array,*i,
@@ -807,11 +877,14 @@ for(NKspace_num;NKspace_num<end;NKspace_num++){
                 //cout<<i->connections[6]<<" ";
                 //cout<<i->connections[7]<<endl;
             }*/
-            //}
+            }
         }
+        agent_array[99].matrix_print(agent_array);
+        /*
         for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); i++) {
             i->connection_swap(*i);
         }
+        */
         memset(::matrix,0,sizeof(::matrix));
         for (int i = 0; i < 100; ++i)
         {
