@@ -495,7 +495,7 @@ public:
         vector<int> old_cons=input_agent.connections;
         vector<int> C_potential;
         vector<int> D_potential;
-        int B=old_cons[selected(generator)];
+        int B=old_cons[selected(Srdm)];
         for(int i=0;i<pool.size();i++){ //find and only adds agents for C* from the pool that are not connected to A
             bool found = false;
             for (auto & elem : Agents[pool[i]].connections)
@@ -513,13 +513,13 @@ public:
         //cout<<C_potential.size()<<" test 1"<<endl;
         std::uniform_int_distribution<> c_sel(0,C_potential.size()-1); //random selection of C* from C_potential.
         std::random_device Crdm;
-        int C=C_potential[c_sel(generator)];
+        int C=C_potential[c_sel(Crdm)];
         vector<int> C_cons=Agents[C].connections;
-
-        for(int i=0;i<C_cons.size();i++){ // find and only adds agents for D* from the C* that are not connected to B or A
+        cout<<C_potential.size()<<" test 0"<<endl;
+        for(int i=0;i<C_cons.size();i++){ // find and only adds agents for D* from the C* that are not connected to B
             bool found = false;
             for (auto & elem : Agents[C_cons[i]].connections)
-                if (elem == B || elem==A)
+                if (elem == B)
                 {
                     found = true;
                     break;
@@ -530,12 +530,32 @@ public:
                         D_potential.push_back(C_cons[i]);
                     }
         }
-
-        cout<<D_potential.size()<<" test 2"<<endl;
+        while(D_potential.size()==0)
+        {
+            C=C_potential[c_sel(Crdm)];
+            vector<int> C_cons=Agents[C].connections;
+            cout<<C_potential.size()<<" test 1"<<endl;
+            for(int i=0;i<C_cons.size();i++){ // find and only adds agents for D* from the C* that are not connected to B
+                bool found = false;
+                for (auto & elem : Agents[C_cons[i]].connections)
+                    if (elem == B || elem==A)
+                    {
+                        found = true;
+                        break;
+                    }
+                    if(found==true) continue;
+                    if(found==false)
+                        {
+                            D_potential.push_back(C_cons[i]);
+                        }
+            }
+        }
+        cout<<D_potential.size()<<" test 3"<<endl;
         std::uniform_int_distribution<> d_sel(0,D_potential.size()-1);
         std::random_device Drdm;
-        int D=D_potential[d_sel(generator)];
-        while(D==C) D=D_potential[d_sel(generator)];
+        int D=D_potential[d_sel(Drdm)];
+        while(D==C||D==B) D=D_potential[d_sel(Drdm)];
+
         /*
         cout<<"before\n";
         cout<<Agents[A].id<<endl;
@@ -565,16 +585,16 @@ public:
         */
         std::vector<int>::iterator ABit = std::find(Agents[A].connections.begin(), Agents[A].connections.end(), B);
         int ABindex = std::distance(Agents[A].connections.begin(), ABit);
-        cout<<Agents[A].connections[ABindex];
+        //cout<<Agents[A].connections[ABindex];
         std::vector<int>::iterator BAit = std::find(Agents[B].connections.begin(), Agents[B].connections.end(), A);
         int BAindex = std::distance(Agents[B].connections.begin(), BAit);
-        cout<<Agents[B].connections[BAindex];
+        //cout<<Agents[B].connections[BAindex];
         std::vector<int>::iterator CDit = std::find(Agents[C].connections.begin(), Agents[C].connections.end(), D);
         int CDindex = std::distance(Agents[C].connections.begin(), CDit); 
-        cout<<Agents[C].connections[CDindex];
+        //cout<<Agents[C].connections[CDindex];
         std::vector<int>::iterator DCit = std::find(Agents[D].connections.begin(), Agents[D].connections.end(), C);
         int DCindex = std::distance(Agents[D].connections.begin(), DCit);
-        cout<<Agents[D].connections[DCindex];
+        //cout<<Agents[D].connections[DCindex];
         Agents[A].connections[ABindex]=C;
         Agents[B].connections[BAindex]=D;
         Agents[C].connections[CDindex]=A;
@@ -606,6 +626,7 @@ public:
         std::sort(Agents[B].connections.begin(),Agents[B].connections.end());
         std::sort(Agents[C].connections.begin(),Agents[C].connections.end());
         std::sort(Agents[D].connections.begin(),Agents[D].connections.end());
+        input_agent.minority=0;
         cout<<"info \n";
             //matrix_fill_after(input_agent.id,new_cons);            
             //connection_swap(input_agent);
@@ -749,6 +770,7 @@ int main(int argc, char *argv[]) {
     double mcount;
 for(NKspace_num;NKspace_num<end;NKspace_num++){
 	srand(NKspace_num+1);
+    cout<<NKspace_num<<endl;
 	if(NKspace_num>0){
 		agent_array.clear();
 		NKspacescore.clear();
@@ -879,7 +901,7 @@ for(NKspace_num;NKspace_num<end;NKspace_num++){
             }*/
             }
         }
-        agent_array[99].matrix_print(agent_array);
+        //agent_array[99].matrix_print(agent_array);
         /*
         for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); i++) {
             i->connection_swap(*i);
