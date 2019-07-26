@@ -24,9 +24,7 @@ using std::vector;
 int n = pow(2, 20);
 const int nbgh = 100;
 const int agentcount = 100;
-int matrix[100][100]={};
-std::uniform_real_distribution<double> uni(0.0, .0005);
-std::random_device rd;
+int matrix[1][1]={};
 
 void open_space_scores(int j, vector<double> &input_vec) {
     std::fstream in_scores;
@@ -53,22 +51,35 @@ void open_space_string(vector <string> &string_vec) {
 };
 
 void AB_list(vector<char> &types){//creates list of A and B and randomly assigns one to an agent at the beginning of every new NK_Space
-    vector<char> AB(::agentcount);
-    for (int i = 0; i < ::agentcount; ++i) {
-        if (i < 50) AB[i] = 'A';
-        if (i >= 50) AB[i] = 'B';
-    }
-    //int acount=0;
-    //int bcount=0;
+    std::seed_seq seed{std::time(0)};
+    std::default_random_engine generator(seed);
+    std::bernoulli_distribution distribution(0.5);
+
+    int acount=0;
+    int bcount=0;
     int temp = 0;
+    std::vector<char> sp={'A','A','B','B','B','A','A','B','A','B','B','A','A','A','B','B','B','B','A','A','B','B','A','B','B','A','A','B','B','B','B','B','B','B','A','A','A','B','B','B','A','A','A','B','B','B','A','A','B','B','B','B','A','A','B','B','A','B','B','A','B','A','B','A','A','B','B','A','B','A','B','A','A','B','A','B','B','A','A','B','B','A','B','B','A','B','A','B','B','B','B','A','A','A','A','B','B','A','A','B'};
+    /*
     for (int i = 0; i < ::agentcount; ++i) {
-        temp = rand() % (::agentcount - i);
-        types[i] = AB[temp];
-        AB.erase(AB.begin() + temp);
-        //if(types[i]=='A') acount++;
-        //if(types[i]=='B') bcount++;
-        //cout<<types[i]<<endl;
+        temp=distribution(generator);
+        if(temp==1) types[i]='A';
+        if(temp==0) types[i]='B';
+        if(types[i]=='A') acount++;
+        if(types[i]=='B') bcount++;
+        cout<<types[i];
+
+        distribution.reset();
     }
+    */
+    for (int i = 0; i < sp.size(); ++i)
+    {
+        types[i]=sp[i];
+                if(types[i]=='A') acount++;
+        if(types[i]=='B') bcount++;
+    }
+    //cout<<" ";
+    //cout<<acount<<" "<<bcount<<endl;
+    
 };
 void ABCDE_list(vector<char> &types){//creates list of A, B,C,D,E and randomly assigns one to an agent at the beginning of every new NK_Space
     vector<char> AB(::agentcount);
@@ -169,12 +180,25 @@ public:
         input_agent.binarystring = istring[num];
     };
 
+    void agent_minority_status(Agent &input_agent, Agent a, Agent b, Agent c, Agent d, Agent e, Agent f, Agent g, Agent h){
+        int minorcalc = 0;
+        if (input_agent.species != a.species) minorcalc++;
+        if (input_agent.species != b.species) minorcalc++;
+        if (input_agent.species != c.species) minorcalc++;
+        if (input_agent.species != d.species) minorcalc++;
+        if (input_agent.species != e.species) minorcalc++;
+        if (input_agent.species != f.species) minorcalc++;
+        if (input_agent.species != g.species) minorcalc++;
+        if (input_agent.species != h.species) minorcalc++;
+        if (minorcalc >4) input_agent.minority = 1;
+    };
     void agent_exploit(Agent &input_agent, Agent a, Agent b, Agent c, Agent d, Agent e, Agent f, Agent g, Agent h) {
         //checks connections and assigns new score to main agent if needed otherwise sets flag to -1
         // also checks if it is in the minority and sets the minority flag to 1
         double temscore = input_agent.score;
         string temstring = input_agent.binarystring;
         // minority calc and flag
+        /*
         int minorcalc = 0;
         if (input_agent.species != a.species) minorcalc++;
         if (input_agent.species != b.species) minorcalc++;
@@ -185,7 +209,9 @@ public:
         if (input_agent.species != g.species) minorcalc++;
         if (input_agent.species != h.species) minorcalc++;
         if (minorcalc > 4) input_agent.minority = 1;
-
+        */
+        agent_minority_status(input_agent,a,b,c,d,e,f,g,h);
+        //cout<<"minority status "<<input_agent.minority<<endl;
         //score update
         if (temscore < a.score) {
             temscore = a.score;
@@ -244,8 +270,8 @@ public:
             input_agent.flag = 0;
         }
     };
-    void agent_explore_A(Agent &input_agent, vector<string> &istring, vector<double> &val){
-        std::uniform_int_distribution<> randm(0, 3);
+    void agent_explore_A_10(Agent &input_agent, vector<string> &istring, vector<double> &val){
+        std::uniform_int_distribution<> randm(0, 9);
         std::random_device rdm;
         int random = randm(rdm);
         //cout<<random<<endl;
@@ -270,8 +296,60 @@ public:
         }
     };
 
-    void agent_explore_B(Agent &input_agent, vector<string> &istring, vector<double> &val){
-        std::uniform_int_distribution<> randm(4, 7);
+    void agent_explore_A_even(Agent &input_agent, vector<string> &istring, vector<double> &val){
+        std::uniform_int_distribution<> randm(1, 9);
+        std::random_device rdm;
+        int random = randm(rdm)*2;
+        //cout<<random<<" A "<<endl;
+        //checks if flag is really -1
+        if (input_agent.flag == -1) {
+            //keeps running until flag is not -1
+            string temstring = input_agent.binarystring;
+            if (temstring[random] == '1') {
+                temstring[random] = '0';
+            } else {
+                temstring[random] = '1';
+            }
+            std::bitset<20> newidbinary = std::bitset<20>(temstring);
+            int newid=newidbinary.to_ulong();
+            // if new string and score are better assigns them to agent
+            if (input_agent.score < val[newid]) {
+                input_agent.score = val[newid];
+                input_agent.binarystring = temstring;
+            }
+            // sets to 0 when done, for testing use another number, after testing is done set to 0
+            input_agent.flag = 0;
+        }
+    };
+
+    void agent_explore_B_odd(Agent &input_agent, vector<string> &istring, vector<double> &val){
+        std::uniform_int_distribution<> randm(1, 9);
+        std::random_device rdm;
+        int random = randm(rdm)*2+1;
+        //cout<<random<<" B "<<endl;
+        //checks if flag is really -1
+        if (input_agent.flag == -1) {
+            //keeps running until flag is not -1
+            string temstring = input_agent.binarystring;
+            if (temstring[random] == '1') {
+                temstring[random] = '0';
+            } else {
+                temstring[random] = '1';
+            }
+            std::bitset<20> newidbinary = std::bitset<20>(temstring);
+            int newid=newidbinary.to_ulong();
+            // if new string and score are better assigns them to agent
+            if (input_agent.score < val[newid]) {
+                input_agent.score = val[newid];
+                input_agent.binarystring = temstring;
+            }
+            // sets to 0 when done, for testing use another number, after testing is done set to 0
+            input_agent.flag = 0;
+        }
+    };
+
+    void agent_explore_B_10(Agent &input_agent, vector<string> &istring, vector<double> &val){
+        std::uniform_int_distribution<> randm(10, 19);
         std::random_device rdm;
         int random = randm(rdm);
         //cout<<random<<endl;
@@ -296,8 +374,8 @@ public:
         }
     };
 
-    void agent_explore_C(Agent &input_agent, vector<string> &istring, vector<double> &val){
-        std::uniform_int_distribution<> randm(8, 11);
+    void agent_explore_A_swap(Agent &input_agent, vector<string> &istring, vector<double> &val){
+        std::uniform_int_distribution<> randm(0, 18);
         std::random_device rdm;
         int random = randm(rdm);
         //cout<<random<<endl;
@@ -305,10 +383,61 @@ public:
         if (input_agent.flag == -1) {
             //keeps running until flag is not -1
             string temstring = input_agent.binarystring;
-            if (temstring[random] == '1') {
-                temstring[random] = '0';
-            } else {
-                temstring[random] = '1';
+            int temp=temstring[random];
+            temstring[random]=temstring[random+1];
+            temstring[random+1]=temp;
+            std::bitset<20> newidbinary = std::bitset<20>(temstring);
+            int newid=newidbinary.to_ulong();
+            // if new string and score are better assigns them to agent
+            if (input_agent.score < val[newid]) {
+                input_agent.score = val[newid];
+                input_agent.binarystring = temstring;
+            }
+            // sets to 0 when done, for testing use another number, after testing is done set to 0
+            input_agent.flag = 0;
+        }
+    };
+    void agent_explore_B_swap(Agent &input_agent, vector<string> &istring, vector<double> &val){
+        std::uniform_int_distribution<> randm(0, 19);
+        std::uniform_int_distribution<> randm2(0, 19);
+        std::random_device rdm;
+        int random = randm(rdm);
+        int random2 = randm2(rdm);
+        while(abs(random2-random)<=2) random2 = randm2(rdm); 
+        //cout<<random<<endl;
+        //checks if flag is really -1
+        if (input_agent.flag == -1) {
+            //keeps running until flag is not -1
+            string temstring = input_agent.binarystring;
+            int temp=temstring[random];
+            temstring[random]=temstring[random2];
+            temstring[random2]=temp;
+            std::bitset<20> newidbinary = std::bitset<20>(temstring);
+            int newid=newidbinary.to_ulong();
+            // if new string and score are better assigns them to agent
+            if (input_agent.score < val[newid]) {
+                input_agent.score = val[newid];
+                input_agent.binarystring = temstring;
+            }
+            // sets to 0 when done, for testing use another number, after testing is done set to 0
+            input_agent.flag = 0;
+        }
+    };
+
+    void agent_explore_A_flip(Agent &input_agent, vector<string> &istring, vector<double> &val){
+        //cout<<random<<endl;
+        //checks if flag is really -1
+        if (input_agent.flag == -1) {
+            //keeps running until flag is not -1
+            string temstring = input_agent.binarystring;
+            for(int i=0;i<10;i++){
+                if (temstring[i] == '1')
+                {
+                    temstring[i] = '0';
+                } 
+                else {
+                    temstring[i] = '1';
+                }
             }
             std::bitset<20> newidbinary = std::bitset<20>(temstring);
             int newid=newidbinary.to_ulong();
@@ -322,132 +451,50 @@ public:
         }
     };
 
-    void agent_explore_D(Agent &input_agent, vector<string> &istring, vector<double> &val){
-        std::uniform_int_distribution<> randm(12, 15);
-        std::random_device rdm;
-        int random = randm(rdm);
+    void agent_explore_B_flip(Agent &input_agent, vector<string> &istring, vector<double> &val){
         //cout<<random<<endl;
         //checks if flag is really -1
         if (input_agent.flag == -1) {
             //keeps running until flag is not -1
             string temstring = input_agent.binarystring;
-            if (temstring[random] == '1') {
-                temstring[random] = '0';
-            } else {
-                temstring[random] = '1';
-            }
-            std::bitset<20> newidbinary = std::bitset<20>(temstring);
-            int newid=newidbinary.to_ulong();
-            // if new string and score are better assigns them to agent
-            if (input_agent.score < val[newid]) {
-                input_agent.score = val[newid];
-                input_agent.binarystring = temstring;
-            }
-            // sets to 0 when done, for testing use another number, after testing is done set to 0
-            input_agent.flag = 0;
-        }
-    };
-
-    void agent_explore_E(Agent &input_agent, vector<string> &istring, vector<double> &val){
-        std::uniform_int_distribution<> randm(16, 19);
-        std::random_device rdm;
-        int random = randm(rdm);
-        //cout<<random<<endl;
-        //checks if flag is really -1
-        if (input_agent.flag == -1) {
-            //keeps running until flag is not -1
-            string temstring = input_agent.binarystring;
-            if (temstring[random] == '1') {
-                temstring[random] = '0';
-            } else {
-                temstring[random] = '1';
-            }
-            std::bitset<20> newidbinary = std::bitset<20>(temstring);
-            int newid=newidbinary.to_ulong();
-            // if new string and score are better assigns them to agent
-            if (input_agent.score < val[newid]) {
-                input_agent.score = val[newid];
-                input_agent.binarystring = temstring;
-            }
-            // sets to 0 when done, for testing use another number, after testing is done set to 0
-            input_agent.flag = 0;
-        }
-    };
-
-    void agent_explore(Agent &input_agent, vector<string> &istring, vector<double> &val) {
-        // if agent with flag -1 will explore
-
-        if(input_agent.species=='A') agent_explore_A(input_agent,istring,val);
-        if(input_agent.species=='B') agent_explore_B(input_agent,istring,val);
-        if(input_agent.species=='C') agent_explore_C(input_agent,istring,val);
-        if(input_agent.species=='D') agent_explore_D(input_agent,istring,val);
-        if(input_agent.species=='E') agent_explore_E(input_agent,istring,val);
-        
-    };
-
-    void agent_minority_swap(int num,Agent &input_agent,Agent a, Agent b, Agent c, Agent d, Agent e, Agent f, Agent g, Agent h){
-    	// swaps agent that is in minority; by going one connection through i.e agent 98 will have the potential to get agents 90 through 6's connections
-    	// will randomly only get 8 from the 17.
-        
-            srand(num);
-            vector<int> temp(64);
-            vector<int> newcons(8);
-            int rdm=0;
-            for(int i=0;i<8;i++){// fills temp with all possible connections including duplicates, will also fill temp up simultaneously from the other 8 agents
-                temp[i]=a.connections[i];
-                //cout<<a.id<<"id "<<a.connections[i]<<" a con"<<endl;
-                temp[8+i]=b.connections[i];
-                //cout<<b.id<<"id "<<b.connections[i]<<" b con"<<endl;
-                temp[16+i]=c.connections[i];
-                //cout<<c.id<<"id "<<c.connections[i]<<" c con"<<endl;
-                temp[24+i]=d.connections[i];
-                //cout<<d.id<<"id "<<d.connections[i]<<" d con"<<endl;
-                temp[32+i]=e.connections[i];
-                //cout<<e.id<<"id "<<e.connections[i]<<" e con"<<endl;
-                temp[40+i]=f.connections[i];
-                //cout<<f.id<<"id "<<f.connections[i]<<" f con"<<endl;
-                temp[48+i]=g.connections[i];
-                //cout<<g.id<<"id "<<g.connections[i]<<" g con"<<endl;
-                temp[56+i]=h.connections[i];
-                //cout<<h.id<<"id "<<h.connections[i]<<" h con"<<endl;
-            }
-
+            for(int i=10;i<20;i++){
             
-            //sorts temp and removes duplicate values to create a vector
-            sort(temp.begin(), temp.end());
-            auto last = std::unique(temp.begin(), temp.end());
-            temp.erase(last, temp.end());
-            // cout << input_agent.id << " id " << endl;
-            for (int i =0; i<8;i++) {
-               // cout<<i<<endl;
-                std::uniform_int_distribution<> rands(0, (temp.size()-i-1));
-       			std::random_device rdm;
-      			int random = rands(rdm);
-      			
-      			while(temp[random]==input_agent.id){// prevents the agent from getting itself as possible connections
-      				std::uniform_int_distribution<> rands(0, (temp.size()-i-1));
-      				random = rands(rdm);
-      			}
-                newcons[i] = temp[random];
-                //cout<<newcons[i]<<" ";
-                temp.erase(temp.begin()+random);
-                temp.resize(temp.size());
+                if (temstring[i] == '1')
+                {
+                    temstring[i] = '0';
+                } 
+                else {
+                    temstring[i] = '1';
+                }
             }
-            //cout<<endl;
-            //cout<<"new"<<endl;
-            for (int j = 0; j <8 ; ++j) {
-
-                //cout<<newcons[j]<<"new con"<<endl;
-                input_agent.tempconnections[j]=newcons[j];
+            std::bitset<20> newidbinary = std::bitset<20>(temstring);
+            int newid=newidbinary.to_ulong();
+            // if new string and score are better assigns them to agent
+            if (input_agent.score < val[newid]) {
+                input_agent.score = val[newid];
+                input_agent.binarystring = temstring;
             }
-            sort(input_agent.tempconnections.begin(), input_agent.tempconnections.end());
-        //when down resets flag back to 0, regardless of status
-        connection_swap(input_agent);
-        input_agent.minority=0;
-        temp.clear();
-        temp.resize(0);
+            // sets to 0 when done, for testing use another number, after testing is done set to 0
+            input_agent.flag = 0;
+        }
     };
-    void connection_swap(Agent &input_agent){// set connections equal to temp connection and clears, resize temp for future uses
+    
+
+    void agent_explore(Agent &input_agent, vector<string> &istring, vector<double> &val,int search) {
+        // if agent with flag -1 will explore
+        //cout<<search<<endl;
+        if(input_agent.species=='A' && search==0) agent_explore_A_10(input_agent,istring,val);
+        if(input_agent.species=='B' && search==0) agent_explore_B_10(input_agent,istring,val);
+        if(input_agent.species=='B' && search==1) agent_explore_A_even(input_agent,istring,val);
+        if(input_agent.species=='B' && search==1) agent_explore_B_odd(input_agent,istring,val);
+        if(input_agent.species=='B' && search==2) agent_explore_A_swap(input_agent,istring,val);
+        if(input_agent.species=='B' && search==2) agent_explore_B_swap(input_agent,istring,val);
+        if(input_agent.species=='B' && search==3) agent_explore_A_flip(input_agent,istring,val);
+        if(input_agent.species=='B' && search==3) agent_explore_B_flip(input_agent,istring,val);
+        
+    };
+
+    void connection_swap(Agent &input_agent){// set connections equal to temp connection and clears, resize temp for future uses; for testing only
         input_agent.connections=input_agent.tempconnections;
         input_agent.tempconnections.clear();
         input_agent.tempconnections.resize(8);
@@ -515,7 +562,7 @@ public:
         std::random_device Crdm;
         int C=C_potential[c_sel(Crdm)];
         vector<int> C_cons=Agents[C].connections;
-        cout<<C_potential.size()<<" test 0"<<endl;
+        //cout<<C_potential.size()<<" test 0"<<endl;
         for(int i=0;i<C_cons.size();i++){ // find and only adds agents for D* from the C* that are not connected to B
             bool found = false;
             for (auto & elem : Agents[C_cons[i]].connections)
@@ -534,7 +581,7 @@ public:
         {
             C=C_potential[c_sel(Crdm)];
             vector<int> C_cons=Agents[C].connections;
-            cout<<C_potential.size()<<" test 1"<<endl;
+            //cout<<C_potential.size()<<" test 1"<<endl;
             for(int i=0;i<C_cons.size();i++){ // find and only adds agents for D* from the C* that are not connected to B
                 bool found = false;
                 for (auto & elem : Agents[C_cons[i]].connections)
@@ -550,7 +597,7 @@ public:
                         }
             }
         }
-        cout<<D_potential.size()<<" test 3"<<endl;
+        //cout<<D_potential.size()<<" test 3"<<endl;
         std::uniform_int_distribution<> d_sel(0,D_potential.size()-1);
         std::random_device Drdm;
         int D=D_potential[d_sel(Drdm)];
@@ -627,9 +674,8 @@ public:
         std::sort(Agents[C].connections.begin(),Agents[C].connections.end());
         std::sort(Agents[D].connections.begin(),Agents[D].connections.end());
         input_agent.minority=0;
-        cout<<"info \n";
+        //cout<<"info \n";
             //matrix_fill_after(input_agent.id,new_cons);            
-            //connection_swap(input_agent);
     };
 
     void matrix_fill_before(int id,vector<int> filler)
@@ -694,8 +740,8 @@ void output_connections(vector<Agent> &Agents,int rounds){ //outputs all agents 
 	}
 };
 
-void output_round(int NKspace,int round,vector<int> rounds,vector<double> scr,vector<double> ag,vector<double> mc,vector<int> us,vector<double> pu){
-	std::ofstream out("8c-NK_space_"+to_string(NKspace)+".txt");
+void output_round(int NKspace,int round,vector<int> rounds,vector<double> scr,vector<double> ag,vector<double> mc,vector<int> us,vector<double> pu,int search){
+	std::ofstream out("8c-NK_space_"+to_string(NKspace)+"_SH_"+to_string(search)+".txt");
 	out<<"round,"<<"max score,"<<"avg score,"<<"Number of unique solutions,"<<"percent with max score,"<<"minority count"<<"\n";
 	for (int i=0;i<round; i++){
 		out<<std::setprecision(15)<<rounds[i]<<","<<scr[i]<<","<<ag[i]<<","<<us[i]<<","<<pu[i]<<","<<std::setprecision(15)<<mc[i]<<"\n";
@@ -737,10 +783,19 @@ void swapper(vector<Agent> &v,vector<int> &a,vector<int> &b){
 int main(int argc, char *argv[]) { 
     std::stringstream convert1(argv[1]);
     std::stringstream convert2(argv[2]);
+    std::string convert3(argv[3]);
+    std::string convert4(argv[4]);
     int start;
     convert1 >> start;
     int end;
     convert2 >> end;
+    int searchm;
+    if(convert3=="-S" && atoi(argv[4])<=3){
+        searchm=atoi(argv[4]);
+    }
+    else{
+        searchm=0;
+    }
     int NKspace_num=start;
     vector <Agent> agent_array(::agentcount);
     cout.setf(std::ios::fixed);
@@ -797,7 +852,7 @@ for(NKspace_num;NKspace_num<end;NKspace_num++){
     	mcount=0;
     	eq=0.0;
     	max=0.0;
-        ::matrix[100][100]={};
+        //::matrix[100][100]={};
     }
 	AB_list(type);
 	open_space_scores(NKspace_num, NKspacescore);
@@ -844,7 +899,20 @@ for(NKspace_num;NKspace_num<end;NKspace_num++){
         percentuni[rounds]=(percuni);
 
         //cout<<percentuni[rounds]<<endl;
-        mcount = 0;
+        mcount = 0.0;
+        for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); i++) {
+            i->agent_minority_status(*i, agent_array[i->connections[0]], agent_array[i->connections[1]],
+                            agent_array[i->connections[2]], agent_array[i->connections[3]],
+                            agent_array[i->connections[4]], agent_array[i->connections[5]],
+                            agent_array[i->connections[6]], agent_array[i->connections[7]]);
+            if (i->minority == 1) {
+                mcount++;
+                i->minority==0;
+            }
+        }
+        mcount = mcount / 100.0;
+        //cout<<mcount<<endl;
+        minoritycount[rounds] = mcount;
         for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); i++) {
 
             i->agent_exploit(*i, agent_array[i->connections[0]], agent_array[i->connections[1]],
@@ -853,14 +921,10 @@ for(NKspace_num;NKspace_num<end;NKspace_num++){
                             agent_array[i->connections[6]], agent_array[i->connections[7]]);
             //cout<<i->id<<" \033[1;31mid\033[0m "<<i->species<<" \033[1;32mspecies\033[0m "<<"\n";
             //cout<<i->minority<<" minority"<<" \033[1;34mnew_string\033[0m "<<endl;
-            if (i->minority == 1) {
-                mcount++;
-            }
+            
         }
         /*output_connections(agent_array,rounds);*/
-        mcount = mcount / 100;
-        //cout<<mcount<<endl;
-        minoritycount[rounds] = mcount;
+
         for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); i++) {
             i->agent_swap_info(*i);
             //cout<<i->id<<" id \t"<<i->score<<" \033[1;31mnew_score\033[0m "<<i->tempscore<<" \033[1;32mold_score\033[0m "<<"\n";
@@ -869,7 +933,7 @@ for(NKspace_num;NKspace_num<end;NKspace_num++){
 
         for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); i++) {
             if (i->flag == -1) {
-                i->agent_explore(*i, NKspacevals, NKspacescore);
+                i->agent_explore(*i, NKspacevals, NKspacescore,searchm);
                 //agent_array[i].agentexplore(agent_array[i],NKspace);
                 //cout<<i->id<<" id \t"<<i->score<<" \033[1;31mnew_score\033[0m "<<i->tempscore<<" \033[1;32mold_score\033[0m "<<"\n";
                 //cout<<i->binarystring<<" \033[1;34mnew_string\033[0m "<<i->tempstring<<" \033[1;33mold_string\033[0m "<<"\n";
@@ -878,43 +942,17 @@ for(NKspace_num;NKspace_num<end;NKspace_num++){
         //swap_agents(agent_array);
         for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); i++) {
             if (i->minority == 1) {
-                cout<<i->id<<" id \n";
+               //cout<<i->id<<" id \n";
                 //if(i->id==0)i->connections={(1+i->id)%(100),(3+i->id)%(100),(5+i->id)%(100),(7+i->id)%(100),(11+i->id)%(100),(13+i->id)%(100),(17+i->id)%(100),(19+i->id)%(100)};
                 i->agent_swap_con(agent_array,*i,
                                        agent_array[i->connections[0]],agent_array[i->connections[1]],
                                        agent_array[i->connections[2]], agent_array[i->connections[3]],
                                        agent_array[i->connections[4]], agent_array[i->connections[5]],
                                        agent_array[i->connections[6]], agent_array[i->connections[7]]);
-                /*i->agent_minority_swap(i->id,*i,
-                                       agent_array[i->connections[0]],agent_array[i->connections[1]],
-                                       agent_array[i->connections[2]], agent_array[i->connections[3]],
-                                       agent_array[i->connections[4]], agent_array[i->connections[5]],
-                                       agent_array[i->connections[6]], agent_array[i->connections[7]]);
-                //cout<<i->connections[0]<<" ";
-                //cout<<i->connections[1]<<" ";
-                //cout<<i->connections[2]<<" ";
-                //cout<<i->connections[3]<<" ";
-                //cout<<i->connections[4]<<" ";
-                //cout<<i->connections[5]<<" ";
-                //cout<<i->connections[6]<<" ";
-                //cout<<i->connections[7]<<endl;
-            }*/
             }
         }
         //agent_array[99].matrix_print(agent_array);
-        /*
-        for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); i++) {
-            i->connection_swap(*i);
-        }
-        */
-        memset(::matrix,0,sizeof(::matrix));
-        for (int i = 0; i < 100; ++i)
-        {
-            for (int j = 0; j < 100; ++j)
-            {
-                ::matrix[i][j]=0;
-            }
-        }
+
         max=0;
         for (int i = 0; i < ::agentcount; i++) {
             //cout<<agent_array[i].score<<endl;
@@ -946,7 +984,7 @@ for(NKspace_num;NKspace_num<end;NKspace_num++){
         cout << avgscores[i] << " \033[1;32mavg score for round\033[0m " << i << "\n";
         cout << minoritycount[i] << " \033[1;34mminority count for round\033[0m " << i << "\n";
     }*/
-    output_round(NKspace_num,rounds,maxround,maxscore,avgscores,minoritycount,uniquesize,percentuni);
+    output_round(NKspace_num,rounds,maxround,maxscore,avgscores,minoritycount,uniquesize,percentuni,searchm);
 }
     return 0;
 }
