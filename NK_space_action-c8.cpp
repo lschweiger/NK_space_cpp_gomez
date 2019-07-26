@@ -485,11 +485,11 @@ public:
         //cout<<search<<endl;
         if(input_agent.species=='A' && search==0) agent_explore_A_10(input_agent,istring,val);
         if(input_agent.species=='B' && search==0) agent_explore_B_10(input_agent,istring,val);
-        if(input_agent.species=='B' && search==1) agent_explore_A_even(input_agent,istring,val);
+        if(input_agent.species=='A' && search==1) agent_explore_A_even(input_agent,istring,val);
         if(input_agent.species=='B' && search==1) agent_explore_B_odd(input_agent,istring,val);
-        if(input_agent.species=='B' && search==2) agent_explore_A_swap(input_agent,istring,val);
+        if(input_agent.species=='A' && search==2) agent_explore_A_swap(input_agent,istring,val);
         if(input_agent.species=='B' && search==2) agent_explore_B_swap(input_agent,istring,val);
-        if(input_agent.species=='B' && search==3) agent_explore_A_flip(input_agent,istring,val);
+        if(input_agent.species=='A' && search==3) agent_explore_A_flip(input_agent,istring,val);
         if(input_agent.species=='B' && search==3) agent_explore_B_flip(input_agent,istring,val);
         
     };
