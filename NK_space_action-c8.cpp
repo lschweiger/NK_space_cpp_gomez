@@ -19,7 +19,7 @@ using std::vector;
 #include <sstream>
 #include <stdio.h>
 #include <cstring>
-
+#include <omp.h>
 //#include <thread>
 int n = pow(2, 20);
 const int nbgh = 100;
@@ -51,25 +51,15 @@ void open_space_string(vector <string> &string_vec) {
 };
 
 void AB_list(vector<char> &types){//creates list of A and B and randomly assigns one to an agent at the beginning of every new NK_Space
-    std::seed_seq seed{std::time(0)};
-    std::default_random_engine generator(seed);
-    std::bernoulli_distribution distribution(0.5);
-
-    //int acount=0;
-    //int bcount=0;
     int temp = 0;
     std::vector<char> sp={'A','A','B','B','B','A','A','B','A','B','B','A','A','A','B','B','B','B','A','A','B','B','A','B','B','A','A','B','B','B','B','B','B','B','A','A','A','B','B','B','A','A','A','B','B','B','A','A','B','B','B','B','A','A','B','B','A','B','B','A','B','A','B','A','A','B','B','A','B','A','B','A','A','B','A','B','B','A','A','B','B','A','B','B','A','B','A','B','B','B','B','A','A','A','A','B','B','A','A','B'};
 
     for (int i = 0; i < sp.size(); ++i)
     {
         types[i]=sp[i];
-        //if(types[i]=='A') acount++;
-        //if(types[i]=='B') bcount++;
-    }
-    //cout<<" ";
-    //cout<<acount<<" "<<bcount<<endl;
-    
+    }   
 };
+
 void ABCDE_list(vector<char> &types){//creates list of A, B,C,D,E and randomly assigns one to an agent at the beginning of every new NK_Space
     vector<char> AB(::agentcount);
     for (int i = 0; i < ::agentcount; i++) {
@@ -185,6 +175,7 @@ public:
 
     void mutate(Agent &input,vector<double> &values){
     std::random_device rd;
+
     std::binomial_distribution<int> binom (1,0.05);
     std::string mutate = input.tempstring;
     for(int i=0;i<20;i++) {
@@ -196,11 +187,12 @@ public:
             }
         }
     }
-    //cout<<input.id<<" "<<input.flag<<" "<<mutate<<endl;
-    input.tempstring=mutate;
     int mutscores=std::bitset<20>(mutate).to_ulong();
-    //cout<<values[mutscores]<<endl;
-    input.tempscore=values[mutscores];
+    if(input.score<values[mutscores])
+    	{	
+	    	input.tempstring=mutate;
+	    	input.tempscore=values[mutscores];
+	    }
     };
 
 
@@ -231,36 +223,43 @@ public:
             temstring = a.binarystring;
             input_agent.flag = 1;//
         }
+
         if (temscore < b.score) {
             temscore = b.score;
             temstring = b.binarystring;
             input_agent.flag = 1;
         }
+
         if (temscore < c.score) {
             temscore = c.score;
             temstring = c.binarystring;
             input_agent.flag = 1;
         }
+
         if (temscore < d.score) {
             temscore = d.score;
             temstring = d.binarystring;
             input_agent.flag = 1;
         }
+
         if (temscore < e.score) {
             temscore = e.score;
             temstring = e.binarystring;
             input_agent.flag = 1;
         }
+
         if (temscore < f.score) {
             temscore = f.score;
             temstring = f.binarystring;
             input_agent.flag = 1;
         }
+
         if (temscore < g.score) {
             temscore = g.score;
             temstring = g.binarystring;
             input_agent.flag = 1;
         }
+
         if (temscore < h.score) {
             temscore = h.score;
             temstring = h.binarystring;
@@ -268,6 +267,7 @@ public:
         }
         input_agent.tempscore = temscore;
         input_agent.tempstring = temstring;
+
         if(input_agent.flag==1){
             mutate(input_agent,valscores);
             //input_agent.mutate_flag=1;
@@ -290,7 +290,8 @@ public:
     void agent_explore_A_10(Agent &input_agent, vector<string> &istring, vector<double> &val){
         std::uniform_int_distribution<> randm(0, 9);
         std::random_device rdm;
-        int random = randm(rdm);
+        std::mt19937 gen(rdm());
+        int random = randm(gen);
         //cout<<random<<endl;
         //checks if flag is really -1
         if (input_agent.flag == -1) {
@@ -316,7 +317,8 @@ public:
     void agent_explore_B_10(Agent &input_agent, vector<string> &istring, vector<double> &val){
         std::uniform_int_distribution<> randm(10, 19);
         std::random_device rdm;
-        int random = randm(rdm);
+        std::mt19937 gen(rdm());
+        int random = randm(gen);
         //cout<<random<<endl;
         //checks if flag is really -1
         if (input_agent.flag == -1) {
@@ -342,7 +344,8 @@ public:
     void agent_explore_A_even(Agent &input_agent, vector<string> &istring, vector<double> &val){
         std::uniform_int_distribution<> randm(1, 9);
         std::random_device rdm;
-        int random = randm(rdm)*2;
+        std::mt19937 gen(rdm());
+        int random = randm(gen)*2;
         //cout<<random<<" A "<<endl;
         //checks if flag is really -1
         if (input_agent.flag == -1) {
@@ -368,7 +371,8 @@ public:
     void agent_explore_B_odd(Agent &input_agent, vector<string> &istring, vector<double> &val){
         std::uniform_int_distribution<> randm(1, 9);
         std::random_device rdm;
-        int random = randm(rdm)*2+1;
+        std::mt19937 gen(rdm());
+        int random = randm(gen)*2+1;
         //cout<<random<<" B "<<endl;
         //checks if flag is really -1
         if (input_agent.flag == -1) {
@@ -394,7 +398,8 @@ public:
     void agent_explore_A_swap(Agent &input_agent, vector<string> &istring, vector<double> &val){
         std::uniform_int_distribution<> randm(0, 18);
         std::random_device rdm;
-        int random = randm(rdm);
+        std::mt19937 gen(rdm());
+        int random = randm(gen);
         //cout<<random<<endl;
         //checks if flag is really -1
         if (input_agent.flag == -1) {
@@ -418,7 +423,8 @@ public:
         std::uniform_int_distribution<> randm(0, 19);
         std::uniform_int_distribution<> randm2(0, 19);
         std::random_device rdm;
-        int random = randm(rdm);
+        std::mt19937_64 gen(rdm());
+        int random = randm(gen);
         int random2 = randm2(rdm);
         while(abs(random2-random)<=1) random2 = randm2(rdm); 
         //cout<<random<<endl;
@@ -520,13 +526,14 @@ public:
             vector<int> newcons(8);
             for (int i =0; i<8;i++) {
                // cout<<i<<endl;
-                std::uniform_int_distribution<> rands(0, (temp.size()-i-1));
+                std::uniform_int_distribution<> rands(0, (temp.size()-1));
                 std::random_device rdm;
-                int random = rands(rdm);
+                std::mt19937 gen(rdm());
+                int random = rands(gen);
                 rands.reset();
                 while(temp[random]==input_agent.id){// prevents the agent from getting itself as possible connections
-                    std::uniform_int_distribution<> rands(0, (temp.size()-i-1));
-                    random = rands(rdm);
+                    std::uniform_int_distribution<> rands(0, (temp.size()-1));
+                    random = rands(gen);
                     rands.reset();
                 }
                 newcons[i] = temp[random];
@@ -589,15 +596,16 @@ public:
 
     void agent_swap_con(vector<Agent> &Agents,Agent &input_agent,Agent a, Agent b, Agent c, Agent d, Agent e, Agent f, Agent g, Agent h){ //swaps an agents connection using the adjacency matrix
         //matrix_fill_before(input_agent.id,input_agent.connections);
-        std::default_random_engine generator (2);
+        //std::default_random_engine generator (2);
         int A=input_agent.id; //input agent named A 
         std::uniform_int_distribution<> selected(0, input_agent.connections.size()-1); //random selction for B
         std::random_device Srdm;
+        std::mt19937 gen(Srdm());
         vector<int> pool=pool_con(input_agent,a,b,c,d,e,f,g,h); //set of all 1st degree connected agents that we pick C* from
         vector<int> old_cons=input_agent.connections;
         vector<int> C_potential;
         vector<int> D_potential;
-        int B=old_cons[selected(Srdm)];
+        int B=old_cons[selected(gen)];
         for(int i=0;i<pool.size();i++){ //find and only adds agents for C* from the pool that are not connected to A
             bool found = false;
             for (auto & elem : Agents[pool[i]].connections)
@@ -615,7 +623,8 @@ public:
         //cout<<C_potential.size()<<" test 1"<<endl;
         std::uniform_int_distribution<> c_sel(0,C_potential.size()-1); //random selection of C* from C_potential.
         std::random_device Crdm;
-        int C=C_potential[c_sel(Crdm)];
+        std::mt19937 genC(Crdm());
+        int C=C_potential[c_sel(genC)];
         vector<int> C_cons=Agents[C].connections;
         //cout<<C_potential.size()<<" test 0"<<endl;
         for(int i=0;i<C_cons.size();i++){ // find and only adds agents for D* from the C* that are not connected to B
@@ -655,7 +664,8 @@ public:
         //cout<<D_potential.size()<<" test 3"<<endl;
         std::uniform_int_distribution<> d_sel(0,D_potential.size()-1);
         std::random_device Drdm;
-        int D=D_potential[d_sel(Drdm)];
+        std::mt19937 genD(Drdm());
+        int D=D_potential[d_sel(genD)];
         while(D==C||D==B) D=D_potential[d_sel(Drdm)];
 
         /*
@@ -778,6 +788,32 @@ public:
             cout<<" num "<<count<<" "<<i<<endl;
         }
     };
+
+	void swap_species(Agent &input_agent,double& epsilon)
+	{
+		std::random_device rdm;
+		std::mt19937_64 gen(rdm());
+		std::binomial_distribution<int> binom (1,epsilon);
+		int flag=0;
+		int probchange=binom(gen);
+    		if(probchange==1)
+    		{
+    			cout<<input_agent.id<<" agent species before "<<input_agent.species<<endl;
+    			if(input_agent.species=='A')
+    			{
+    				input_agent.species='B';
+    				flag=1;
+    				cout<<"change "<<input_agent.species<<endl;
+    			}
+    			if(flag==0 && input_agent.species=='B')
+    			{
+    				input_agent.species='A';
+    				cout<<"change "<<input_agent.species<<endl;
+    			}
+    		}
+		//cout<<"agent species after "<<input_agent.species<<endl;
+	}
+
 };
 
 
@@ -795,8 +831,11 @@ void output_connections(vector<Agent> &Agents,int rounds){ //outputs all agents 
 	}
 };
 
-void output_round(int NKspace,int round,vector<int> rounds,vector<double> scr,vector<double> ag,vector<double> mc,vector<int> us,vector<double> pu,int search){
-	std::ofstream out("8c-NK_space_"+to_string(NKspace)+"_SH_"+to_string(search)+".txt");
+void output_round(int NKspace,int round,vector<int> rounds,vector<double> scr,vector<double> ag,vector<double> mc,vector<int> us,vector<double> pu,int search,int typeout){
+	string outtype="";
+	if(typeout==-1)  outtype="minority";
+	if(typeout==1)  outtype ="majority";
+	std::ofstream out("8c-NK_space_"+to_string(NKspace)+"_"+outtype+"_SH_"+to_string(search)+".txt");
 	out<<"round,"<<"max score,"<<"avg score,"<<"Number of unique solutions,"<<"percent with max score,"<<"minority count"<<"\n";
 	for (int i=0;i<round; i++){
 		out<<std::setprecision(15)<<rounds[i]<<","<<scr[i]<<","<<ag[i]<<","<<us[i]<<","<<pu[i]<<","<<std::setprecision(15)<<mc[i]<<"\n";
@@ -840,18 +879,29 @@ std::ios::sync_with_stdio(false);
     std::stringstream convert1(argv[1]);
     std::stringstream convert2(argv[2]);
     std::string convert3(argv[3]);
-    std::string convert4(argv[4]);
+    //std::string convert4(argv[4]);
     int start;
     convert1 >> start;
     int end;
     convert2 >> end;
     int searchm;
+    double prob=0.0;
     if(convert3=="-S" && atoi(argv[4])<=3){
         searchm=atoi(argv[4]);
     }
     else{
         searchm=0;
     }
+
+    if(argc>=5 && atof(argv[5])>0.0) 
+    {
+    	prob=atof(argv[5]);
+    	cout<<"using "<<prob<<endl;
+    } 
+    else{
+    		prob=0.05; 
+    		cout<<"using default probability of 0.05 for species switch\n";
+    	}
     int NKspace_num=start;
     vector <Agent> agent_array(::agentcount);
     cout.setf(std::ios::fixed);
@@ -871,7 +921,7 @@ std::ios::sync_with_stdio(false);
     vector<int> maxround(100);
     vector<double> minoritycount(100);
     vector<double> avgscores(100);
-    vector<char> type(::agentcount);
+    vector<char> type(100);
     vector<int> uniquesize(100);
     vector<double> percentuni(100);
     AB_list(type);
@@ -879,55 +929,67 @@ std::ios::sync_with_stdio(false);
 	int rounds = 0;
     int nums = 0;
     double mcount;
-for(NKspace_num;NKspace_num<end;NKspace_num++){
-	srand(NKspace_num+1);
-    cout<<NKspace_num<<endl;
-	if(NKspace_num>0){
-		agent_array.clear();
-		NKspacescore.clear();
-		maxscore.clear();
-		maxround.clear();
-		minoritycount.clear();
-		avgscores.clear();
-		type.clear();
-        uniquesize.clear();
-        percentuni.clear();
-		agent_array.resize(100);
-		NKspacescore.resize(100);
-		maxscore.resize(100);
-		maxround.resize(100);
-		minoritycount.resize(100);
-		avgscores.resize(100);
-		type.resize(100);
-        uniquesize.resize(100);
-        percentuni.resize(100);
-        percuni=0;
-        unisize=0;
-		rounds = 0;
-    	nums = 0;
-    	mcount=0;
-    	eq=0.0;
-    	max=0.0;
-        //::matrix[100][100]={};
-    }
-	AB_list(type);
-	open_space_scores(NKspace_num, NKspacescore);
-    for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); i++) {
 
+#pragma omp parallel for ordered default(none) shared(end,searchm,::n,NKspacevals,NKspace_num,cout,prob) firstprivate(max,eq,avgscore,unisize,percuni,maxscore,maxround,minoritycount,avgscores,uniquesize,percentuni,NKspacescore,rounds,mcount,agent_array,type,nums) schedule(static, 10)
+	for(int inksp=NKspace_num;inksp<end;++inksp){
+		//srand(inksp+1);
+    	cout<<inksp<<endl;
+    	cout<<"\t thread #: "<<endl;
+		if(inksp>0)
+		{
+			agent_array.clear();
+			NKspacescore.clear();
+			maxscore.clear();
+			maxround.clear();
+			minoritycount.clear();
+			avgscores.clear();
+			type.clear();
+	        uniquesize.clear();
+	        percentuni.clear();
+			agent_array.resize(100);
+			NKspacescore.resize(100);
+			maxscore.resize(100);
+			maxround.resize(100);
+			minoritycount.resize(100);
+			avgscores.resize(100);
+			type.resize(100);
+	        uniquesize.resize(100);
+	        percentuni.resize(100);
+	        percuni=0;
+	        unisize=0;
+			rounds = 0;
+	    	nums = 0;
+	    	mcount=0;
+	    	eq=0.0;
+	    	max=0.0;
+	        //::matrix[100][100]={};
+	        //std::cin.get();
+    	}
+	AB_list(type);
+	open_space_scores(inksp, NKspacescore);
+    for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); ++i) 
+    {
+    	std::uniform_int_distribution<> ids(0,::n); //r
+        std::random_device rdm;
+        std::mt19937 gen(rdm());
+        int rnums=ids(gen);
+        //cout<<rnums<<"\n";
         i->agent_connections(nums, *i);
         i->species = type[nums];
         //cout<<i->id<<endl;
         //cout<<i->species<<endl;
-        i->agent_change(rand() % (::n), *i, NKspacevals, NKspacescore);
+        i->agent_change(rnums, *i, NKspacevals, NKspacescore);
 
         nums++;
     }
 
-    for (rounds; rounds < 100; rounds++) {
+    for (rounds; rounds < 100; ++rounds) {
         unisize=1;
         string binstr=agent_array[0].binarystring;
-        for (int i=1; i<::agentcount;i++){
-            if(binstr!=agent_array[i].binarystring){
+        for (int i=1; i<::agentcount;++i)
+        {
+            if(binstr!=agent_array[i].binarystring)
+            {
                 unisize++;
                 binstr=agent_array[i].binarystring;
             }
@@ -935,9 +997,11 @@ for(NKspace_num;NKspace_num<end;NKspace_num++){
         }
         uniquesize[rounds]=unisize;
         max=0;
-        for (int i = 0; i < ::agentcount; i++) {
+        for (int i = 0; i < ::agentcount; ++i) 
+        {
             //cout<<agent_array[i].score<<endl;
-            if (max < agent_array[i].score) {
+            if (max < agent_array[i].score) 
+            {
                 max = agent_array[i].score;
             }
 
@@ -946,7 +1010,8 @@ for(NKspace_num;NKspace_num<end;NKspace_num++){
         percuni=0;
         for (int i = 0; i < 100; ++i)
         {
-            if(max==agent_array[i].score){
+            if(max==agent_array[i].score)
+            {
                 percuni++;
                 //cout<<percuni<<" ";
             }
@@ -956,12 +1021,14 @@ for(NKspace_num;NKspace_num<end;NKspace_num++){
 
         //cout<<percentuni[rounds]<<endl;
         mcount = 0.0;
-        for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); i++) {
+        for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); ++i) 
+        {
             i->agent_minority_status(*i, agent_array[i->connections[0]], agent_array[i->connections[1]],
                             agent_array[i->connections[2]], agent_array[i->connections[3]],
                             agent_array[i->connections[4]], agent_array[i->connections[5]],
                             agent_array[i->connections[6]], agent_array[i->connections[7]]);
-            if (i->minority == 1) {
+            if (i->minority == 1) 
+            {
                 mcount++;
                 i->minority==0;
             }
@@ -969,7 +1036,8 @@ for(NKspace_num;NKspace_num<end;NKspace_num++){
         mcount = mcount / 100.0;
         //cout<<mcount<<endl;
         minoritycount[rounds] = mcount;
-        for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); i++) {
+        for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); ++i)
+        {
 
             i->agent_exploit(*i, agent_array[i->connections[0]], agent_array[i->connections[1]],
                             agent_array[i->connections[2]], agent_array[i->connections[3]],
@@ -981,34 +1049,39 @@ for(NKspace_num;NKspace_num<end;NKspace_num++){
         }
         /*output_connections(agent_array,rounds);*/
 
-        for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); i++) {
+        for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); ++i) {
             i->agent_swap_interal_info(*i);
             //cout<<i->id<<" id \t"<<i->score<<" \033[1;31mnew_score\033[0m "<<i->tempscore<<" \033[1;32mold_score\033[0m "<<"\n";
             //cout<<i->binarystring<<" \033[1;34mnew_string\033[0m "<<i->tempstring<<" \033[1;33mold_string\033[0m "<<"\n";
         }
 
 
-        for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); i++) {
-            if (i->flag == -1) {
+        for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); ++i) 
+        {
+            if (i->flag == -1) 
+            {
                 i->agent_explore(*i, NKspacevals, NKspacescore,searchm);
                 //agent_array[i].agentexplore(agent_array[i],NKspace);
                 //cout<<i->id<<" id \t"<<i->score<<" \033[1;31mnew_score\033[0m "<<i->tempscore<<" \033[1;32mold_score\033[0m "<<"\n";
                 //cout<<i->binarystring<<" \033[1;34mnew_string\033[0m "<<i->tempstring<<" \033[1;33mold_string\033[0m "<<"\n";
             }
         }
-
+        
         //swap_agents(agent_array);
-        for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); i++) {
-            if (i->minority == 1) {
+        for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); ++i) 
+        {
+            if (i->minority == 1) 
+            {
                //cout<<i->id<<" id \n";
                 //if(i->id==0)i->connections={(1+i->id)%(100),(3+i->id)%(100),(5+i->id)%(100),(7+i->id)%(100),(11+i->id)%(100),(13+i->id)%(100),(17+i->id)%(100),(19+i->id)%(100)};
+                
                 i->agent_swap_con(agent_array,*i,
                                        agent_array[i->connections[0]],agent_array[i->connections[1]],
                                        agent_array[i->connections[2]], agent_array[i->connections[3]],
                                        agent_array[i->connections[4]], agent_array[i->connections[5]],
                                        agent_array[i->connections[6]], agent_array[i->connections[7]]);
-                /*
-                i->agent_minority_swap(i->id,*i,
+                
+                /*i->agent_minority_swap(i->id,*i,
                                        agent_array[i->connections[0]],agent_array[i->connections[1]],
                                        agent_array[i->connections[2]], agent_array[i->connections[3]],
                                        agent_array[i->connections[4]], agent_array[i->connections[5]],
@@ -1017,13 +1090,16 @@ for(NKspace_num;NKspace_num<end;NKspace_num++){
                 
             }
         }
-
+        for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); ++i) i->swap_species(*i,prob);
+        //memset(::matrix,0,sizeof(::matrix));
         //agent_array[99].matrix_print(agent_array);
-
+        
         max=0;
-        for (int i = 0; i < ::agentcount; i++) {
+        for (int i = 0; i < ::agentcount; ++i) 
+        {
             //cout<<agent_array[i].score<<endl;
-            if (max < agent_array[i].score) {
+            if (max < agent_array[i].score) 
+            {
                 max = agent_array[i].score;
             }
 
@@ -1032,14 +1108,16 @@ for(NKspace_num;NKspace_num<end;NKspace_num++){
         maxscore[rounds] = max;
         maxround[rounds] = rounds;
 		eq=maxscore[rounds];
-        avgscore = 0;
-        for (int i = 0; i < ::agentcount; i++) {
+        avgscore = 0.0;
+        for (int i = 0; i < ::agentcount; ++i) 
+        {
             avgscore += agent_array[i].score;
         }
 
         avgscores[rounds] = (avgscore / (::agentcount));
         int eqflag=0;
-    	if((uniquesize[rounds]==1 &&uniquesize[rounds-1]==1) || rounds>=70){
+    	if((uniquesize[rounds]==1 &&uniquesize[rounds-1]==1) || rounds>=70)
+    	{
     		//cout<<fabs((avgscore/100.0)-eq)<<"fabs"<<endl;
     		eqflag=1;
     	}
@@ -1051,7 +1129,8 @@ for(NKspace_num;NKspace_num<end;NKspace_num++){
         cout << avgscores[i] << " \033[1;32mavg score for round\033[0m " << i << "\n";
         cout << minoritycount[i] << " \033[1;34mminority count for round\033[0m " << i << "\n";
     }*/
-    output_round(NKspace_num,rounds,maxround,maxscore,avgscores,minoritycount,uniquesize,percentuni,searchm);
-}
+    int condition=1;
+    output_round(inksp,rounds,maxround,maxscore,avgscores,minoritycount,uniquesize,percentuni,searchm,condition);
+	}
     return 0;
 }
