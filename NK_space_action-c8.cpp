@@ -50,7 +50,7 @@ void open_space_string(vector <string> &string_vec) {
     strings.close();
 };
 
-void AB_list(vector<char> &types){//creates list of A and B and randomly assigns one to an agent at the beginning of every new NK_Space
+void AB_list(vector<char> &types){//creates list of A and B and  assigns one to an agent at the beginning of every new NK_Space
     int temp = 0;
     std::vector<char> sp={'A','A','B','B','B','A','A','B','A','B','B','A','A','A','B','B','B','B','A','A','B','B','A','B','B','A','A','B','B','B','B','B','B','B','A','A','A','B','B','B','A','A','A','B','B','B','A','A','B','B','B','B','A','A','B','B','A','B','B','A','B','A','B','A','A','B','B','A','B','A','B','A','A','B','A','B','B','A','A','B','B','A','B','B','A','B','A','B','B','B','B','A','A','A','A','B','B','A','A','B'};
 
