@@ -789,14 +789,23 @@ public:
         }
     };
 
-	void swap_species(Agent &input_agent,double& epsilon)
-	{
+	void swap_species(Agent &input_agent,double& epsilon,Agent a, Agent b, Agent c, Agent d, Agent e, Agent f, Agent g, Agent h)
+	{//swaps agent species with given probability, to species type that is in majority 
 		std::random_device rdm;
 		std::mt19937_64 gen(rdm());
 		std::binomial_distribution<int> binom (1,epsilon);
 		int flag=0;
 		int probchange=binom(gen);
-    		if(probchange==1)
+		int minorcalc = 0;
+		if (input_agent.species != a.species) minorcalc++;
+        if (input_agent.species != b.species) minorcalc++;
+        if (input_agent.species != c.species) minorcalc++;
+        if (input_agent.species != d.species) minorcalc++;
+        if (input_agent.species != e.species) minorcalc++;
+        if (input_agent.species != f.species) minorcalc++;
+        if (input_agent.species != g.species) minorcalc++;
+        if (input_agent.species != h.species) minorcalc++;
+    		if(probchange==1 && minorcalc>4)
     		{
     			cout<<input_agent.id<<" agent species before "<<input_agent.species<<endl;
     			if(input_agent.species=='A')
@@ -841,7 +850,7 @@ void output_round(int NKspace,int round,vector<int> rounds,vector<double> scr,ve
 		out<<std::setprecision(15)<<rounds[i]<<","<<scr[i]<<","<<ag[i]<<","<<us[i]<<","<<pu[i]<<","<<std::setprecision(15)<<mc[i]<<"\n";
 	}
 };
-void swapper(vector<Agent> &v,vector<int> &a,vector<int> &b){
+void swapper(vector<Agent> &v,vector<int> &a,vector<int> &b){ //swaping function
         char s;
         string string;
         double binary;
@@ -886,6 +895,8 @@ std::ios::sync_with_stdio(false);
     convert2 >> end;
     int searchm;
     double prob=0.0;
+    //cout<<argc<<" argc \n"<<endl;
+    //for (int i=0;i<argc;++i) cout<<"argv"<<i<<" "<<argv[i]<<endl;
     if(convert3=="-S" && atoi(argv[4])<=3){
         searchm=atoi(argv[4]);
     }
@@ -893,15 +904,24 @@ std::ios::sync_with_stdio(false);
         searchm=0;
     }
 
-    if(argc>=5 && atof(argv[5])>0.0) 
+    if(argc==6 && atof(argv[5])>=0)
     {
-    	prob=atof(argv[5]);
-    	cout<<"using "<<prob<<endl;
-    } 
-    else{
+    	if(atof(argv[5])>=0.0) 
+    	{
+    		prob=atof(argv[5]);
+    		cout<<"using "<<prob<<endl;
+    	} 
+    	else
+    	{
     		prob=0.05; 
     		cout<<"using default probability of 0.05 for species switch\n";
     	}
+    }
+    else
+    {
+    	cout<<"skipping species swap \n";
+    	prob=-1;
+    }
     int NKspace_num=start;
     vector <Agent> agent_array(::agentcount);
     cout.setf(std::ios::fixed);
@@ -930,7 +950,7 @@ std::ios::sync_with_stdio(false);
     int nums = 0;
     double mcount;
 
-#pragma omp parallel for ordered default(none) shared(end,searchm,::n,NKspacevals,NKspace_num,cout,prob) firstprivate(max,eq,avgscore,unisize,percuni,maxscore,maxround,minoritycount,avgscores,uniquesize,percentuni,NKspacescore,rounds,mcount,agent_array,type,nums) schedule(static, 10)
+#pragma omp parallel for ordered default(none) shared(end,searchm,::n,NKspacevals,NKspace_num,cout,prob,argc) firstprivate(max,eq,avgscore,unisize,percuni,maxscore,maxround,minoritycount,avgscores,uniquesize,percentuni,NKspacescore,rounds,mcount,agent_array,type,nums) schedule(static, 10)
 	for(int inksp=NKspace_num;inksp<end;++inksp){
 		//srand(inksp+1);
     	cout<<inksp<<endl;
@@ -968,7 +988,7 @@ std::ios::sync_with_stdio(false);
 	AB_list(type);
 	open_space_scores(inksp, NKspacescore);
     for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); ++i) 
-    {
+    {// assignment of information to agents, changes for each NK_Space
     	std::uniform_int_distribution<> ids(0,::n); //r
         std::random_device rdm;
         std::mt19937 gen(rdm());
@@ -984,6 +1004,10 @@ std::ios::sync_with_stdio(false);
     }
 
     for (rounds; rounds < 100; ++rounds) {
+    	/*
+		intial data collection before every round starts its run
+		runs through all agents to find number of unique solutions, max score and percent unique
+    	*/
         unisize=1;
         string binstr=agent_array[0].binarystring;
         for (int i=1; i<::agentcount;++i)
@@ -1034,11 +1058,13 @@ std::ios::sync_with_stdio(false);
             }
         }
         mcount = mcount / 100.0;
+        /*
+		end of data collection
+        */
         //cout<<mcount<<endl;
         minoritycount[rounds] = mcount;
         for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); ++i)
         {
-
             i->agent_exploit(*i, agent_array[i->connections[0]], agent_array[i->connections[1]],
                             agent_array[i->connections[2]], agent_array[i->connections[3]],
                             agent_array[i->connections[4]], agent_array[i->connections[5]],
@@ -1066,31 +1092,39 @@ std::ios::sync_with_stdio(false);
                 //cout<<i->binarystring<<" \033[1;34mnew_string\033[0m "<<i->tempstring<<" \033[1;33mold_string\033[0m "<<"\n";
             }
         }
-        
-        //swap_agents(agent_array);
-        for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); ++i) 
-        {
-            if (i->minority == 1) 
-            {
-               //cout<<i->id<<" id \n";
-                //if(i->id==0)i->connections={(1+i->id)%(100),(3+i->id)%(100),(5+i->id)%(100),(7+i->id)%(100),(11+i->id)%(100),(13+i->id)%(100),(17+i->id)%(100),(19+i->id)%(100)};
-                
-                i->agent_swap_con(agent_array,*i,
-                                       agent_array[i->connections[0]],agent_array[i->connections[1]],
-                                       agent_array[i->connections[2]], agent_array[i->connections[3]],
-                                       agent_array[i->connections[4]], agent_array[i->connections[5]],
-                                       agent_array[i->connections[6]], agent_array[i->connections[7]]);
-                
-                /*i->agent_minority_swap(i->id,*i,
-                                       agent_array[i->connections[0]],agent_array[i->connections[1]],
-                                       agent_array[i->connections[2]], agent_array[i->connections[3]],
-                                       agent_array[i->connections[4]], agent_array[i->connections[5]],
-                                       agent_array[i->connections[6]], agent_array[i->connections[7]]);
-                */
-                
-            }
-        }
-        for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); ++i) i->swap_species(*i,prob);
+        if(prob==-1)
+        { //if argv>=6 and probability is not given all connection manipulations are skipped
+	        //swap_agents(agent_array);
+	        for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); ++i) 
+	        {
+	            if (i->minority == 1) 
+	            {
+	               //cout<<i->id<<" id \n";
+	                //if(i->id==0)i->connections={(1+i->id)%(100),(3+i->id)%(100),(5+i->id)%(100),(7+i->id)%(100),(11+i->id)%(100),(13+i->id)%(100),(17+i->id)%(100),(19+i->id)%(100)};
+	                
+	                i->agent_swap_con(agent_array,*i,
+	                                       agent_array[i->connections[0]],agent_array[i->connections[1]],
+	                                       agent_array[i->connections[2]], agent_array[i->connections[3]],
+	                                       agent_array[i->connections[4]], agent_array[i->connections[5]],
+	                                       agent_array[i->connections[6]], agent_array[i->connections[7]]);
+	                
+	                /*i->agent_minority_swap(i->id,*i,
+	                                       agent_array[i->connections[0]],agent_array[i->connections[1]],
+	                                       agent_array[i->connections[2]], agent_array[i->connections[3]],
+	                                       agent_array[i->connections[4]], agent_array[i->connections[5]],
+	                                       agent_array[i->connections[6]], agent_array[i->connections[7]]);
+	                */
+	                
+	            }
+	        }
+    	}
+        if(argc>=6 && prob!=-1)
+        {//if argv>=6 and probability is given agents will start swapping species type.
+        	for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); ++i) i->swap_species(*i,prob,agent_array[i->connections[0]], agent_array[i->connections[1]],
+                            agent_array[i->connections[2]], agent_array[i->connections[3]],
+                            agent_array[i->connections[4]], agent_array[i->connections[5]],
+                            agent_array[i->connections[6]], agent_array[i->connections[7]]);
+    	}
         //memset(::matrix,0,sizeof(::matrix));
         //agent_array[99].matrix_print(agent_array);
         
