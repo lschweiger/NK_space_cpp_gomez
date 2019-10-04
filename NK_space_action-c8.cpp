@@ -1,3 +1,7 @@
+#ifdef _OPENMP
+# include <omp.h>
+#endif
+
 #include <iostream>
 
 using std::cout;
@@ -17,9 +21,9 @@ using std::vector;
 #include <random>
 #include <algorithm>
 #include <sstream>
-#include <stdio.h>
+#include <cstdio>
 #include <cstring>
-#include <omp.h>
+//#include <omp.h>
 //#include <thread>
 int n = pow(2, 20);
 const int nbgh = 100;
@@ -844,26 +848,18 @@ void output_round(int NKspace,int round,vector<int> rounds,vector<double> scr,ve
 	string outtype="";
 	if(typeout==-1)  outtype="minority";
 	if(typeout==1)  outtype ="majority";
-	std::ofstream out("8c-NK_space_"+to_string(NKspace)+"_"+outtype+"_SH_"+to_string(search)+".txt");
+	if(typeout==0)  outtype ="None";
+	std::fstream out("8c-NK_space_"+to_string(NKspace)+"_"+outtype+"_SH_"+to_string(search)+".txt",std::ios::out | std::ios::binary);
 	out<<"round,"<<"max score,"<<"avg score,"<<"Number of unique solutions,"<<"percent with max score,"<<"minority count"<<"\n";
 	for (int i=0;i<round; i++){
 		out<<std::setprecision(15)<<rounds[i]<<","<<scr[i]<<","<<ag[i]<<","<<us[i]<<","<<pu[i]<<","<<std::setprecision(15)<<mc[i]<<"\n";
 	}
 };
 void swapper(vector<Agent> &v,vector<int> &a,vector<int> &b){ //swaping function
-        char s;
-        string string;
-        double binary;
         for(int i=0;i<a.size();i++){
-            s=v[a[i]].species;
-            string=v[a[i]].binarystring;
-            binary=v[a[i]].score;
-            v[a[i]].species=v[b[i]].species;
-            v[a[i]].binarystring=v[b[i]].binarystring;
-            v[a[i]].score=v[b[i]].score;
-            v[b[i]].species=s;
-            v[b[i]].binarystring=string;
-            v[b[i]].score=binary;
+            v[b[i]].species=v[a[i]].species;
+            v[b[i]].tempstring=v[a[i]].binarystring;
+            v[b[i]].tempscore=v[a[i]].score;
         }
     };
     void swap_agents(vector<Agent> &v){//swaps minority agents by swaping information
@@ -879,7 +875,10 @@ void swapper(vector<Agent> &v,vector<int> &a,vector<int> &b){ //swaping function
         permute=minor;
         std::random_shuffle ( permute.begin(), permute.end() );
         swapper(v,minor,permute);
-
+        for(int i=0;i<minor.size();++i)
+        {
+        	v[permute[i]].agent_swap_interal_info(v[permute[i]]);
+        }
     };
     
 
@@ -895,6 +894,7 @@ std::ios::sync_with_stdio(false);
     convert2 >> end;
     int searchm;
     double prob=0.0;
+    int condition;
     //cout<<argc<<" argc \n"<<endl;
     //for (int i=0;i<argc;++i) cout<<"argv"<<i<<" "<<argv[i]<<endl;
     if(convert3=="-S" && atoi(argv[4])<=3){
@@ -909,11 +909,13 @@ std::ios::sync_with_stdio(false);
     	if(atof(argv[5])>=0.0) 
     	{
     		prob=atof(argv[5]);
+    		condition=0;
     		cout<<"using "<<prob<<endl;
     	} 
     	else
     	{
     		prob=0.05; 
+    		condition=0;
     		cout<<"using default probability of 0.05 for species switch\n";
     	}
     }
@@ -921,6 +923,7 @@ std::ios::sync_with_stdio(false);
     {
     	cout<<"skipping species swap \n";
     	prob=-1;
+    	condition=1;
     }
     int NKspace_num=start;
     vector <Agent> agent_array(::agentcount);
@@ -950,11 +953,11 @@ std::ios::sync_with_stdio(false);
     int nums = 0;
     double mcount;
 
-#pragma omp parallel for ordered default(none) shared(end,searchm,::n,NKspacevals,NKspace_num,cout,prob,argc) firstprivate(max,eq,avgscore,unisize,percuni,maxscore,maxround,minoritycount,avgscores,uniquesize,percentuni,NKspacescore,rounds,mcount,agent_array,type,nums) schedule(static, 10)
+#pragma omp parallel for default(none) shared(end,searchm,::n,NKspacevals,NKspace_num,cout,prob,argc,condition) firstprivate(max,eq,avgscore,unisize,percuni,maxscore,maxround,minoritycount,avgscores,uniquesize,percentuni,NKspacescore,rounds,mcount,agent_array,type,nums)  num_threads(4) schedule(dynamic,64)
 	for(int inksp=NKspace_num;inksp<end;++inksp){
 		//srand(inksp+1);
-    	cout<<inksp<<endl;
-    	cout<<"\t thread #: "<<endl;
+    	//cout<<inksp<<endl;
+    	//cout<<"\t thread #: "<<omp_get_thread_num()<<endl;
 		if(inksp>0)
 		{
 			agent_array.clear();
@@ -1030,7 +1033,7 @@ std::ios::sync_with_stdio(false);
             }
 
         }
-        cout<<"round #"<<rounds<<endl;
+        //cout<<"round #"<<rounds<<endl;
         percuni=0;
         for (int i = 0; i < 100; ++i)
         {
@@ -1054,7 +1057,7 @@ std::ios::sync_with_stdio(false);
             if (i->minority == 1) 
             {
                 mcount++;
-                i->minority==0;
+                i->minority=0;
             }
         }
         mcount = mcount / 100.0;
@@ -1095,6 +1098,7 @@ std::ios::sync_with_stdio(false);
         if(prob==-1)
         { //if argv>=6 and probability is not given all connection manipulations are skipped
 	        //swap_agents(agent_array);
+	        //condition=0;
 	        for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); ++i) 
 	        {
 	            if (i->minority == 1) 
@@ -1163,7 +1167,6 @@ std::ios::sync_with_stdio(false);
         cout << avgscores[i] << " \033[1;32mavg score for round\033[0m " << i << "\n";
         cout << minoritycount[i] << " \033[1;34mminority count for round\033[0m " << i << "\n";
     }*/
-    int condition=1;
     output_round(inksp,rounds,maxround,maxscore,avgscores,minoritycount,uniquesize,percentuni,searchm,condition);
 	}
     return 0;
