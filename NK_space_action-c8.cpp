@@ -942,7 +942,7 @@ std::ios::sync_with_stdio(false);
     {
     	cout<<"skipping species swap \n";
     	prob=-1;
-    	condition=1;
+    	condition=-1;
     }
     int NKspace_num=start;
     vector <Agent> agent_array(::agentcount);
@@ -973,7 +973,7 @@ std::ios::sync_with_stdio(false);
     int nums = 0;
     int mcount=0;
 
-#pragma omp parallel for default(none) shared(end,searchm,::n,NKspacevals,NKspace_num,cout,prob,argc,condition) firstprivate(max,eq,avgscore,unisize,percuni,maxscore,maxround,minoritycount,avgscores,uniquesize,percentuni,NKspacescore,rounds,mcount,agent_array,type,nums)  num_threads(4) schedule(dynamic,64)
+#pragma omp parallel for default(none) shared(end,searchm,::n,NKspacevals,NKspace_num,cout,prob,argc,condition) firstprivate(max,eq,avgscore,unisize,percuni,maxscore,maxround,minoritycount,avgscores,uniquesize,percentuni,NKspacescore,rounds,mcount,agent_array,type,nums,elts)  num_threads(4) schedule(dynamic,64)
 	for(int inksp=NKspace_num;inksp<end;++inksp){
 		//srand(inksp+1);
     	//cout<<inksp<<endl;
@@ -1045,7 +1045,7 @@ std::ios::sync_with_stdio(false);
         	elts.erase(ip,elts.end());
         	uniquesize[rounds]=elts.size();
         }
-        cout<<"round #"<<rounds<<endl;
+        //cout<<"round #"<<rounds<<endl;
 
 
         //cout<<percentuni[rounds]<<endl;
@@ -1066,7 +1066,7 @@ std::ios::sync_with_stdio(false);
         /*
 		end of data collection
         */
-        cout<<mcount<<endl;
+        //cout<<mcount<<endl;
         minoritycount[rounds] = mcount;
         for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); ++i)
         {
@@ -1103,10 +1103,10 @@ std::ios::sync_with_stdio(false);
 	        //condition=0;
 	        for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); ++i) 
 	        {
-	            if (i->minority == 1) 
+	            if (i->minority != 1) 
 	            {
 	               //cout<<i->id<<" id \n";
-	                //if(i->id==0)i->connections={(1+i->id)%(100),(3+i->id)%(100),(5+i->id)%(100),(7+i->id)%(100),(11+i->id)%(100),(13+i->id)%(100),(17+i->id)%(100),(19+i->id)%(100)};
+	              
 	                
 	                i->agent_swap_con(agent_array,*i,
 	                                       agent_array[i->connections[0]],agent_array[i->connections[1]],
@@ -1126,32 +1126,33 @@ std::ios::sync_with_stdio(false);
     	}
         if(argc>=6 && prob!=-1)
         {//if argv>=6 and probability is given agents will start swapping species type.
-        	//for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); ++i) i->swap_species(*i,prob,agent_array[i->connections[0]], agent_array[i->connections[1]],
-              //              agent_array[i->connections[2]], agent_array[i->connections[3]],
-               //             agent_array[i->connections[4]], agent_array[i->connections[5]],
-                //            agent_array[i->connections[6]], agent_array[i->connections[7]]);
+        	for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); ++i) i->swap_species(*i,prob,agent_array[i->connections[0]], agent_array[i->connections[1]],
+                            agent_array[i->connections[2]], agent_array[i->connections[3]],
+                            agent_array[i->connections[4]], agent_array[i->connections[5]],
+                            agent_array[i->connections[6]], agent_array[i->connections[7]]);
     	}
+
         //memset(::matrix,0,sizeof(::matrix));
         //agent_array[99].matrix_print(agent_array);
-        for (int i=0; i<::agentcount;++i)
-        	{
-        		elts[i]=agent_array[i].score;
-        	}
+	
+	/* 
+	 *
+	 *
+	 * start of end round data collection
+	 *
+	 *
+	 */
+	if(rounds>0)
+	{
+        	for (int i=0; i<::agentcount;++i)
+        		{// number of unqiue scores
+        			elts[i]=agent_array[i].score;
+        		}
         	std::sort(elts.begin(),elts.end());
         	auto ip=std::unique(elts.begin(),elts.end());
         	elts.erase(ip,elts.end());
         	uniquesize[rounds]=elts.size();
-        percuni=0;
-        for (int i = 0; i < 100; ++i)
-        {
-            if(max==agent_array[i].score)
-            {
-                percuni++;
-                //cout<<percuni<<" ";
-            }
-
-        }
-        percentuni[rounds]=(percuni);
+	}
         max=0;
         for (int i = 0; i < ::agentcount; ++i) 
         {
@@ -1162,7 +1163,18 @@ std::ios::sync_with_stdio(false);
             }
 
         }
-        cout << minoritycount[rounds] << " \033[1;34mminority count for round\033[0m " << rounds << "\n";
+        percuni=0;
+        for (int i = 0; i < 100; ++i)
+        {// percent of agents with max score
+            if(max==agent_array[i].score)
+            {
+                percuni++;
+                //cout<<percuni<<" ";
+            }
+
+        }
+        percentuni[rounds]=(percuni);
+        //cout << minoritycount[rounds] << " \033[1;34mminority count for round\033[0m " << rounds << "\n";
         maxscore[rounds] = max;
         maxround[rounds] = rounds;
 		eq=maxscore[rounds];
@@ -1174,10 +1186,18 @@ std::ios::sync_with_stdio(false);
 
         avgscores[rounds] = (avgscore / (::agentcount));
         int eqflag=0;
-        output_connections(inksp,agent_array,rounds);
-        output_scores(inksp,agent_array,rounds);
+        //output_connections(inksp,agent_array,rounds);
+        //output_scores(inksp,agent_array,rounds);
+	/*
+	 *
+	 *
+	 * end of data collection
+	 *
+	 *
+	 *
+	 */
     	if((uniquesize[rounds]==1) || rounds>=70)
-    	{
+    	{// checks for break conditions
     		//cout<<fabs((avgscore/100.0)-eq)<<"fabs"<<endl;
     		eqflag=1;
     	}
@@ -1188,8 +1208,8 @@ std::ios::sync_with_stdio(false);
     //for (int i = 0; i < rounds; i++) {
         //cout << maxscore[i] << " \033[1;31mmax score for round\033[0m " << i << endl;
         //cout << avgscores[i] << " \033[1;32mavg score for round\033[0m " << i << "\n";
-    //}
     
+    //
     output_round(inksp,rounds,maxround,maxscore,avgscores,minoritycount,uniquesize,percentuni,searchm,condition);
 	}
     return 0;
