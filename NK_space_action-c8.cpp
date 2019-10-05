@@ -976,7 +976,7 @@ std::ios::sync_with_stdio(false);
 #pragma omp parallel for default(none) shared(end,searchm,::n,NKspacevals,NKspace_num,cout,prob,argc,condition) firstprivate(max,eq,avgscore,unisize,percuni,maxscore,maxround,minoritycount,avgscores,uniquesize,percentuni,NKspacescore,rounds,mcount,agent_array,type,nums,elts)  num_threads(4) schedule(dynamic,64)
 	for(int inksp=NKspace_num;inksp<end;++inksp){
 		//srand(inksp+1);
-    	//cout<<inksp<<endl;
+    	cout<<"NK_space #:"<<inksp<<endl;
     	//cout<<"\t thread #: "<<omp_get_thread_num()<<endl;
 		if(inksp>0)
 		{
