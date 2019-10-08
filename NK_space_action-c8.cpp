@@ -64,6 +64,28 @@ void AB_list(vector<char> &types){//creates list of A and B and  assigns one to 
     }   
 };
 
+void AB_random_list(vector<char> &types, int inksp){//Random assignment of A and B
+	    int ac=0;
+    	int bc=0;
+    	int temp=0;
+    	for (int i = 0; i < 100; ++i)
+    	{
+    	std::bernoulli_distribution d(0.5);
+    	std::mt19937 gen;
+    	gen.seed(inksp+i);
+    	
+    	temp=d(gen);
+    	if(temp==1) {types[i]='A'; ac++;}
+    	if(temp==0) {types[i]='B'; bc++;}
+    	//cout<<temp<< ":V C:"<<types[i]<<" ";
+    	d.reset();
+    	}
+    	//cout<<endl;
+    	//cout<<ac<<":A B:"<<bc<<endl;
+    	//std::cin.get();
+};
+
+
 void ABCDE_list(vector<char> &types){//creates list of A, B,C,D,E and randomly assigns one to an agent at the beginning of every new NK_Space
     vector<char> AB(::agentcount);
     for (int i = 0; i < ::agentcount; i++) {
@@ -802,13 +824,14 @@ public:
         }
     };
 
-	void swap_species(Agent &input_agent,double& epsilon,Agent a, Agent b, Agent c, Agent d, Agent e, Agent f, Agent g, Agent h)
+	void swap_species(Agent &input_agent,double& epsilon)
 	{//swaps agent species with given probability, to species type that is in majority 
 		std::random_device rdm;
 		std::mt19937_64 gen(rdm());
 		std::binomial_distribution<int> binom (1,epsilon);
 		int flag=0;
 		int probchange=binom(gen);
+		/*
 		int minorcalc = 0;
 		if (input_agent.species != a.species) minorcalc++;
         if (input_agent.species != b.species) minorcalc++;
@@ -818,7 +841,8 @@ public:
         if (input_agent.species != f.species) minorcalc++;
         if (input_agent.species != g.species) minorcalc++;
         if (input_agent.species != h.species) minorcalc++;
-    		if(probchange==1 && minorcalc>4)
+        */
+    		if(probchange==1)
     		{
     			cout<<input_agent.id<<" agent species before "<<input_agent.species<<endl;
     			if(input_agent.species=='A')
@@ -865,9 +889,10 @@ void output_scores(int NKspace,vector<Agent> &Agents,int rounds){ //outputs all 
 
 void output_round(int NKspace,int round,vector<int> rounds,vector<double> scr,vector<double> ag,vector<int> mc,vector<int> us,vector<double> pu,int search,int typeout){
 	string outtype="";
+	if(typeout==-9)  outtype ="baseline";
 	if(typeout==-1)  outtype="minority";
 	if(typeout==1)  outtype ="majority";
-	if(typeout==0)  outtype ="None";
+	if(typeout==0)  outtype ="Swap";
 	std::fstream out("8c-NK_space_"+to_string(NKspace)+"_"+outtype+"_SH_"+to_string(search)+".txt",std::ios::out | std::ios::binary);
 	out<<"round,"<<"max score,"<<"avg score,"<<"Number of unique solutions,"<<"percent with max score,"<<"minority count"<<"\n";
 	for (int i=0;i<=round; i++){
@@ -967,17 +992,20 @@ std::ios::sync_with_stdio(false);
     vector<int> uniquesize(100);
     vector<double> percentuni(100);
     vector<double> elts(100);
-    AB_list(type);
+    //AB_list(type);
+    //AB_random_list(type,0);
 
 	int rounds = 0;
     int nums = 0;
     int mcount=0;
 
-#pragma omp parallel for default(none) shared(end,searchm,::n,NKspacevals,NKspace_num,cout,prob,argc,condition) firstprivate(max,eq,avgscore,unisize,percuni,maxscore,maxround,minoritycount,avgscores,uniquesize,percentuni,NKspacescore,rounds,mcount,agent_array,type,nums,elts)  num_threads(4) schedule(dynamic,64)
+#pragma omp parallel for default(none) shared(end,searchm,::n,NKspacevals,NKspace_num,cout,prob,argc,condition) firstprivate(max,eq,avgscore,unisize,percuni,maxscore,maxround,minoritycount,avgscores,uniquesize,percentuni,NKspacescore,rounds,mcount,agent_array,type,nums,elts)  num_threads(4) schedule(dynamic,25)
 	for(int inksp=NKspace_num;inksp<end;++inksp){
 		//srand(inksp+1);
     	cout<<"NK_space #:"<<inksp<<endl;
-    	//cout<<"\t thread #: "<<omp_get_thread_num()<<endl;
+    	#ifdef _OPENMP
+    	cout<<"\t thread #: "<<omp_get_thread_num()<<endl;
+    	#endif
 		if(inksp>0)
 		{
 			agent_array.clear();
@@ -1010,7 +1038,8 @@ std::ios::sync_with_stdio(false);
 	        //::matrix[100][100]={};
 	        //std::cin.get();
     	}
-	AB_list(type);
+    AB_list(type);
+	//AB_random_list(type,inksp);
 	open_space_scores(inksp, NKspacescore);
     for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); ++i) 
     {// assignment of information to agents, changes for each NK_Space
@@ -1036,14 +1065,37 @@ std::ios::sync_with_stdio(false);
 		runs through all agents to find number of unique solutions, max score and percent unique
     	*/
     	if(rounds==0){
-    		for (int i=0; i<::agentcount;++i)
-        	{
-        		elts[i]=agent_array[i].score;
-        	}
+    		        	for (int i=0; i<::agentcount;++i)
+        		{// number of unqiue scores
+        			elts[i]=agent_array[i].score;
+        		}
         	std::sort(elts.begin(),elts.end());
         	auto ip=std::unique(elts.begin(),elts.end());
         	elts.erase(ip,elts.end());
         	uniquesize[rounds]=elts.size();
+
+        max=0;
+        for (int i = 0; i < ::agentcount; ++i) 
+        {
+            //cout<<agent_array[i].score<<endl;
+            if (max < agent_array[i].score) 
+            {
+                max = agent_array[i].score;
+            }
+
+        }
+        percuni=0;
+        
+        for (int i = 0; i < 100; ++i)
+        {// percent of agents with max score
+            if(max==agent_array[i].score)
+            {
+                percuni++;
+                //cout<<percuni<<" ";
+            }
+
+        }
+        percentuni[rounds]=(percuni);
         }
         //cout<<"round #"<<rounds<<endl;
 
@@ -1068,6 +1120,7 @@ std::ios::sync_with_stdio(false);
         */
         //cout<<mcount<<endl;
         minoritycount[rounds] = mcount;
+       
         for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); ++i)
         {
             i->agent_exploit(*i, agent_array[i->connections[0]], agent_array[i->connections[1]],
@@ -1097,41 +1150,40 @@ std::ios::sync_with_stdio(false);
                 //cout<<i->binarystring<<" \033[1;34mnew_string\033[0m "<<i->tempstring<<" \033[1;33mold_string\033[0m "<<"\n";
             }
         }
+        
         if(prob==-1)
         { //if argv>=6 and probability is not given all connection manipulations are skipped
 	        //swap_agents(agent_array);
 	        //condition=0;
 	        for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); ++i) 
 	        {
-	            if (i->minority != 1) 
+	            if (i->minority == 1) 
 	            {
 	               //cout<<i->id<<" id \n";
 	              
 	                
-	                i->agent_swap_con(agent_array,*i,
-	                                       agent_array[i->connections[0]],agent_array[i->connections[1]],
-	                                       agent_array[i->connections[2]], agent_array[i->connections[3]],
-	                                       agent_array[i->connections[4]], agent_array[i->connections[5]],
-	                                       agent_array[i->connections[6]], agent_array[i->connections[7]]);
-	                
-	                /*i->agent_minority_swap(i->id,*i,
+	                /*i->agent_swap_con(agent_array,*i,
 	                                       agent_array[i->connections[0]],agent_array[i->connections[1]],
 	                                       agent_array[i->connections[2]], agent_array[i->connections[3]],
 	                                       agent_array[i->connections[4]], agent_array[i->connections[5]],
 	                                       agent_array[i->connections[6]], agent_array[i->connections[7]]);
 	                */
+	                i->agent_minority_swap(i->id,*i,
+	                                       agent_array[i->connections[0]],agent_array[i->connections[1]],
+	                                       agent_array[i->connections[2]], agent_array[i->connections[3]],
+	                                       agent_array[i->connections[4]], agent_array[i->connections[5]],
+	                                       agent_array[i->connections[6]], agent_array[i->connections[7]]);
 	                
+	               
 	            }
 	        }
     	}
         if(argc>=6 && prob!=-1)
         {//if argv>=6 and probability is given agents will start swapping species type.
-        	for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); ++i) i->swap_species(*i,prob,agent_array[i->connections[0]], agent_array[i->connections[1]],
-                            agent_array[i->connections[2]], agent_array[i->connections[3]],
-                            agent_array[i->connections[4]], agent_array[i->connections[5]],
-                            agent_array[i->connections[6]], agent_array[i->connections[7]]);
+        	for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); ++i) 
+        		i->swap_species(*i,prob);
     	}
-
+		
         //memset(::matrix,0,sizeof(::matrix));
         //agent_array[99].matrix_print(agent_array);
 	
@@ -1152,7 +1204,7 @@ std::ios::sync_with_stdio(false);
         	auto ip=std::unique(elts.begin(),elts.end());
         	elts.erase(ip,elts.end());
         	uniquesize[rounds]=elts.size();
-	}
+
         max=0;
         for (int i = 0; i < ::agentcount; ++i) 
         {
@@ -1164,6 +1216,7 @@ std::ios::sync_with_stdio(false);
 
         }
         percuni=0;
+        
         for (int i = 0; i < 100; ++i)
         {// percent of agents with max score
             if(max==agent_array[i].score)
@@ -1174,11 +1227,13 @@ std::ios::sync_with_stdio(false);
 
         }
         percentuni[rounds]=(percuni);
+    	}
         //cout << minoritycount[rounds] << " \033[1;34mminority count for round\033[0m " << rounds << "\n";
         maxscore[rounds] = max;
         maxround[rounds] = rounds;
 		eq=maxscore[rounds];
         avgscore = 0.0;
+       
         for (int i = 0; i < ::agentcount; ++i) 
         {
             avgscore += agent_array[i].score;
