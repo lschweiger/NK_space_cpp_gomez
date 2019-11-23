@@ -8,13 +8,19 @@ Currently NK space generation is mostly complete and,
 action_space; the basics are done, will need to add to the class structure and add more functions.
 
 **Warning: running `./NK_space_gen` will create 1000 spaces with a total the size of about 19GB**
-# To compile just run (on Linux and mac)
+# To compile and Run (on Linux and mac)
 
 `g++ NK_space_gen.cpp -o NK_space_gen` and<br /> 
 `g++ NK_space_action.cpp -o NK_space_action`<br />
 and run with <br />
 `./NK_space_gen` and<br />
-`./NK_space_action start end -S (search heuristic ) ` with optional probability value 0<p<1; where start is a number and end is larger number and search heuristic is either 0,1,2,3;
-i.e `./NK_space_action 0 10 -S 1 0.05`
-If available NK_space_action can be compiled with OpenMP to allow multiple threads
+`./NK_space_action -s # -e # -S # -c # -m # -M ltr -P prob# `<br />
+-s Start NKspace, requires a number greater than 0 <br />
+-e End NKspace requires a number greater than -s <br />
+-S Search heuristics either 0,1,2 or 3 <br />
+-c Selects Majority or minority seeking where needed, either 1=Majority, -1=Minority , -9 for baseline, or 0 for Permutation swapping <br />
+-m Selects either Matrix method or connection method, 1=Matrix, -1=Connections <br />
+-M If passed morphing will be used in agent exploit phase, active if the lowercase letter z is present <br />
+-P If passed either exponential score difference is use or raw number, -1=Exponential score difference, 0<=P<=1 raw probability is used <br />
+If available OpenMP can be used to take advantage of multiple cores using the following <br /> 
 `g++ -fopenmp NK_space_action.cpp -o NK_space_action`
