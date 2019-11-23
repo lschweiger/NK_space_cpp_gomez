@@ -4,8 +4,8 @@ Research for prof Charles Gomez.
 
 # WIP
 
-Currently NK space generation is mostly complete and,
-action_space; the basics are done, will need to add to the class structure and add more functions.
+Currently NK space generation is complete and,
+action_space; mostly complete and just adding new function and options in functions
 
 **Warning: running `./NK_space_gen` will create 1000 spaces with a total the size of about 19GB**
 # To compile and Run (on Linux and mac)
