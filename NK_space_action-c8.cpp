@@ -22,7 +22,7 @@ using std::vector;
 
 #include "Agents.h"
 int na = pow(2, 20);
-const int nbgha = 100;
+//const int nbgha = 100;
 const int agentcounta = 100;
 int matrixa[100][100]={};
 
@@ -298,7 +298,7 @@ std::ios::sync_with_stdio(false);
         return 0; 
     }
     if(method=='z'){
-        cout<<"Morhping will be used\nIf not desired,do not  pass -M z\n";
+        cout<<"Morhping will be used\nIf not desired, pass -M q\n";
         if(prob==-1) {
             cout<<"using exponetial probability function in Morhping\n Pass # 0<=P<=1 for raw probability\n";
             condition=100;
@@ -433,8 +433,8 @@ std::ios::sync_with_stdio(false);
 	        //::matrix[100][100]={};
 	        //std::cin.get();
     	}
-    //A_list(type);
-    //AB_list_deseg(type);
+	//AB_list_seg(type);
+	//AB_list_deseg(type);
 	AB_random_list(type,inksp);
 	open_space_scores(inksp, NKspacescore);
     for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); ++i) 
@@ -522,7 +522,7 @@ std::ios::sync_with_stdio(false);
             i->Agent::agent_exploit(*i, agent_array[i->connections[0]], agent_array[i->connections[1]],
                             agent_array[i->connections[2]], agent_array[i->connections[3]],
                             agent_array[i->connections[4]], agent_array[i->connections[5]],
-                            agent_array[i->connections[6]], agent_array[i->connections[7]],NKspacescore,prob,method);
+                            agent_array[i->connections[6]], agent_array[i->connections[7]],prob,method);
             //cout<<i->id<<" \033[1;31mid\033[0m "<<i->species<<" \033[1;32mspecies\033[0m "<<" "<<i->mutate_flag<< "\n";
             //cout<<i->minority<<" minority"<<" \033[1;34mnew_string\033[0m "<<endl;
             
@@ -540,7 +540,7 @@ std::ios::sync_with_stdio(false);
         {
             if (i->flag == -1) 
             {
-                i->Agent::agent_explore(*i, NKspacevals, NKspacescore,searchm);
+                i->Agent::agent_explore(*i, NKspacescore,searchm);
                 //agent_array[i].agentexplore(agent_array[i],NKspace);
                 //cout<<i->id<<" id \t"<<i->score<<" \033[1;31mnew_score\033[0m "<<i->tempscore<<" \033[1;32mold_score\033[0m "<<"\n";
                 //cout<<i->binarystring<<" \033[1;34mnew_string\033[0m "<<i->tempstring<<" \033[1;33mold_string\033[0m "<<"\n";
@@ -648,7 +648,7 @@ std::ios::sync_with_stdio(false);
         double samespecies=0;
         for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); ++i)
         {
-            for (int j = 0; j < i->connections.size(); ++j)
+            for (uint j = 0; j < i->connections.size(); ++j)
                {
                   if(i->species==agent_array[i->connections[j]].species) samespecies++;
                }   

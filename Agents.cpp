@@ -22,7 +22,7 @@ using std::vector;
 #include "Agents.h"
 int n = pow(2, 20);
 const int nbgh = 100;
-const int agentcount = 100;
+//const int agentcount = 100;
 int matrix[100][100]={};    
 
     void Agent::agent_connections(int num, Agent &input_agent) {
@@ -53,7 +53,7 @@ int matrix[100][100]={};
         input_agent.connections[6] = (num + 3) % (::nbgh);
         input_agent.connections[7] = (num + 4) % (::nbgh);
         std::sort(input_agent.connections.begin(),input_agent.connections.end());
-    };
+    }
 
     void Agent::agent_change(int num, Agent &input_agent, vector<string> &istring, vector<double> &val) {
         // changes sets score and binarystring by random value.
@@ -61,7 +61,7 @@ int matrix[100][100]={};
         //cout<<val[num]<<" vec test"<<endl;
         //cout<<input_agent.score<<" test" <<endl;
         input_agent.binarystring = istring[num];
-    };
+    }
 
     void Agent::agent_minority_status(Agent &input_agent, Agent a, Agent b, Agent c, Agent d, Agent e, Agent f, Agent g, Agent h){
         int minorcalc = 0;
@@ -95,7 +95,7 @@ int matrix[100][100]={};
         	}
 		else{input_agent.minority=0;}
     
-    };
+    }
 
     void Agent::morph_agent_exp(Agent &input,Agent target,double diffscore){
         std::random_device rd;
@@ -106,7 +106,7 @@ int matrix[100][100]={};
             input.species=target.species;
         }
     
-    };
+    }
 
     void Agent::morph_agent_100(Agent &input,Agent target,double prob){
         std::random_device rd;
@@ -117,10 +117,10 @@ int matrix[100][100]={};
             input.species=target.species;
         }
     
-    };
+    }
 
 
-    void Agent::agent_exploit(Agent &input_agent, Agent a, Agent b, Agent c, Agent d, Agent e, Agent f, Agent g, Agent h,vector<double> &valscores,double prob,char method) {
+    void Agent::agent_exploit(Agent &input_agent, Agent a, Agent b, Agent c, Agent d, Agent e, Agent f, Agent g, Agent h,double prob,char method) {
         //checks connections and assigns new score to main agent if needed otherwise sets flag to -1
         // also checks if it is in the minority and sets the minority flag to 1
         // will mutate agents string and score if they exploit
@@ -235,7 +235,7 @@ int matrix[100][100]={};
             //cout<<input_agent.id<<"\t"<<new_test<<endl;
         }
         if (input_agent.flag == 0) input_agent.flag = -1;
-    };
+    }
 
     void Agent::agent_swap_interal_info(Agent &input_agent) {
         //checks flag and swaps scores and string, for next round if 1, and resets back to 0 for next round
@@ -248,8 +248,8 @@ int matrix[100][100]={};
             input_agent.binarystring = stemp;
             input_agent.flag = 0;
         }
-    };
-    void Agent::agent_explore_A_10(Agent &input_agent, vector<string> &istring, vector<double> &val){
+    }
+    void Agent::agent_explore_A_10(Agent &input_agent, vector<double> &val){
         std::uniform_int_distribution<> randm(0, 9);
         std::random_device rdm;
         std::mt19937 gen(rdm());
@@ -274,9 +274,9 @@ int matrix[100][100]={};
             // sets to 0 when done, for testing use another number, after testing is done set to 0
             input_agent.flag = 0;
         }
-    };
+    }
 
-    void Agent::agent_explore_B_10(Agent &input_agent, vector<string> &istring, vector<double> &val){
+    void Agent::agent_explore_B_10(Agent &input_agent, vector<double> &val){
         std::uniform_int_distribution<> randm(10, 19);
         std::random_device rdm;
         std::mt19937 gen(rdm());
@@ -301,9 +301,9 @@ int matrix[100][100]={};
             // sets to 0 when done, for testing use another number, after testing is done set to 0
             input_agent.flag = 0;
         }
-    };
+    }
 
-    void Agent::agent_explore_A_even(Agent &input_agent, vector<string> &istring, vector<double> &val){
+    void Agent::agent_explore_A_even(Agent &input_agent, vector<double> &val){
         std::uniform_int_distribution<> randm(1, 9);
         std::random_device rdm;
         std::mt19937 gen(rdm());
@@ -328,9 +328,9 @@ int matrix[100][100]={};
             // sets to 0 when done, for testing use another number, after testing is done set to 0
             input_agent.flag = 0;
         }
-    };
+    }
 
-    void Agent::agent_explore_B_odd(Agent &input_agent, vector<string> &istring, vector<double> &val){
+    void Agent::agent_explore_B_odd(Agent &input_agent, vector<double> &val){
         std::uniform_int_distribution<> randm(1, 9);
         std::random_device rdm;
         std::mt19937 gen(rdm());
@@ -355,9 +355,9 @@ int matrix[100][100]={};
             // sets to 0 when done, for testing use another number, after testing is done set to 0
             input_agent.flag = 0;
         }
-    };
+    }
 
-    void Agent::agent_explore_A_swap(Agent &input_agent, vector<string> &istring, vector<double> &val){
+    void Agent::agent_explore_A_swap(Agent &input_agent,  vector<double> &val){
         std::uniform_int_distribution<> randm(0, 18);
         std::random_device rdm;
         std::mt19937 gen(rdm());
@@ -380,8 +380,8 @@ int matrix[100][100]={};
             // sets to 0 when done, for testing use another number, after testing is done set to 0
             input_agent.flag = 0;
         }
-    };
-    void Agent::agent_explore_B_swap(Agent &input_agent, vector<string> &istring, vector<double> &val){
+    }
+    void Agent::agent_explore_B_swap(Agent &input_agent, vector<double> &val){
         std::uniform_int_distribution<> randm(0, 19);
         std::uniform_int_distribution<> randm2(0, 19);
         std::random_device rdm;
@@ -407,9 +407,9 @@ int matrix[100][100]={};
             // sets to 0 when done, for testing use another number, after testing is done set to 0
             input_agent.flag = 0;
         }
-    };
+    }
 
-    void Agent::agent_explore_A_flip(Agent &input_agent, vector<string> &istring, vector<double> &val){
+    void Agent::agent_explore_A_flip(Agent &input_agent, vector<double> &val){
         //cout<<random<<endl;
         //checks if flag is really -1
         if (input_agent.flag == -1) {
@@ -434,9 +434,9 @@ int matrix[100][100]={};
             // sets to 0 when done, for testing use another number, after testing is done set to 0
             input_agent.flag = 0;
         }
-    };
+    }
 
-    void Agent::agent_explore_B_flip(Agent &input_agent, vector<string> &istring, vector<double> &val){
+    void Agent::agent_explore_B_flip(Agent &input_agent, vector<double> &val){
         //cout<<random<<endl;
         //checks if flag is really -1
         if (input_agent.flag == -1) {
@@ -462,22 +462,22 @@ int matrix[100][100]={};
             // sets to 0 when done, for testing use another number, after testing is done set to 0
             input_agent.flag = 0;
         }
-    };
+    }
     
 
-    void Agent::agent_explore(Agent &input_agent, vector<string> &istring, vector<double> &val,int search) {
+    void Agent::agent_explore(Agent &input_agent, vector<double> &val,int search) {
         // if agent with flag -1 will explore
         //cout<<search<<endl;
-        if(input_agent.species=='A' && search==0) agent_explore_A_10(input_agent,istring,val);
-        if(input_agent.species=='B' && search==0) agent_explore_B_10(input_agent,istring,val);
-        if(input_agent.species=='A' && search==1) agent_explore_A_even(input_agent,istring,val);
-        if(input_agent.species=='B' && search==1) agent_explore_B_odd(input_agent,istring,val);
-        if(input_agent.species=='A' && search==2) agent_explore_A_swap(input_agent,istring,val);
-        if(input_agent.species=='B' && search==2) agent_explore_B_swap(input_agent,istring,val);
-        if(input_agent.species=='A' && search==3) agent_explore_A_flip(input_agent,istring,val);
-        if(input_agent.species=='B' && search==3) agent_explore_B_flip(input_agent,istring,val);
+        if(input_agent.species=='A' && search==0) agent_explore_A_10(input_agent,val);
+        if(input_agent.species=='B' && search==0) agent_explore_B_10(input_agent,val);
+        if(input_agent.species=='A' && search==1) agent_explore_A_even(input_agent,val);
+        if(input_agent.species=='B' && search==1) agent_explore_B_odd(input_agent,val);
+        if(input_agent.species=='A' && search==2) agent_explore_A_swap(input_agent,val);
+        if(input_agent.species=='B' && search==2) agent_explore_B_swap(input_agent,val);
+        if(input_agent.species=='A' && search==3) agent_explore_A_flip(input_agent,val);
+        if(input_agent.species=='B' && search==3) agent_explore_B_flip(input_agent,val);
         
-    };
+    }
 
     std::vector<int> pool_con(Agent input_agent,Agent a, Agent b, Agent c, Agent d, Agent e, Agent f, Agent g, Agent h){
         vector<int> temp(64);
@@ -508,13 +508,13 @@ int matrix[100][100]={};
         temp.erase(last, temp.end());
         temp.resize(temp.size());
     return temp;
-    };
+    }
 
     void Agent::connection_swap(Agent &input_agent){// set connections equal to temp connection and clears, resize temp for future uses; for testing only
         input_agent.connections=input_agent.tempconnections;
         input_agent.tempconnections.clear();
         input_agent.tempconnections.resize(8);
-    };
+    }
 
     void Agent::agent_minority_swap(int num,Agent &input_agent,Agent a, Agent b, Agent c, Agent d, Agent e, Agent f, Agent g, Agent h){
         // swaps agent that is in minority; by going through all connections i.e agent 98 will have the potential to get agents 90 through 6's connections
@@ -553,7 +553,7 @@ int matrix[100][100]={};
         input_agent.minority=0;
         temp.clear();
         temp.resize(0);
-    };
+    }
 
     
 
@@ -614,12 +614,14 @@ int matrix[100][100]={};
             //cout<<C_potential.size()<<" test 1"<<endl;
             for(unsigned int i=0;i<C_cons.size();i++){ // find and only adds agents for D* from the C* that are not connected to B
                 bool found = false;
-                for (auto & elem : Agents[C_cons[i]].connections)
+                for(auto & elem : Agents[C_cons[i]].connections)
+                {
                     if (elem == B || elem==A)
                     {
                         found = true;
                         break;
                     }
+                }
                     if(found==true) continue;
                     if(found==false)
                         {
@@ -707,13 +709,13 @@ int matrix[100][100]={};
         input_agent.minority=0;
         //cout<<"info \n";
             //matrix_fill_after(input_agent.id,new_cons);            
-    };
+    }
     void Agent::agent_swap_hack(vector<Agent> &Agents,Agent &input_agent,Agent a, Agent b, Agent c, Agent d, Agent e, Agent f, Agent g, Agent h){
         for (int i = 0; i < 8; ++i)
         {
             agent_swap_con(Agents, input_agent, a, b, c, d, e, f, g, h, i);
         }
-    };
+    }
     void Agent::matrix_fill_before(int id,vector<int> filler)
         {//fills matrix with old connections
             for (unsigned int i = 0; i < filler.size(); i++)
@@ -721,7 +723,7 @@ int matrix[100][100]={};
                 ::matrix[id][filler[i]]=1;
                 ::matrix[filler[i]][id]=1;
             }
-        };
+        }
 
     void Agent::matrix_fill_after(int id,vector<int> filler)
         {// fill matrix with new connection
@@ -730,7 +732,7 @@ int matrix[100][100]={};
                 ::matrix[id][filler[i]]=5;
                 ::matrix[filler[i]][id]=5;
             }
-        };
+        }
     void Agent::matrix_print(vector<Agent> agent_array)
     {//prints and counts new connections,
         memset(::matrix,0,sizeof(::matrix));
@@ -759,7 +761,7 @@ int matrix[100][100]={};
             }
             cout<<" num "<<count<<" "<<i<<endl;
         }
-    };
+    }
 
 	void Agent::swap_species(Agent &input_agent,double& epsilon)
 	{//swaps agent species with given probability, to species type that is in majority 
@@ -795,8 +797,8 @@ int matrix[100][100]={};
     			}
     		}
 		//cout<<"agent species after "<<input_agent.species<<endl;
-	};
-    void Agent::agent_exploit_weighted(Agent &input_agent, Agent a, Agent b, Agent c, Agent d, Agent e, Agent f, Agent g, Agent h,vector<double> &valscores) {
+	}
+    void Agent::agent_exploit_weighted(Agent &input_agent, Agent a, Agent b, Agent c, Agent d, Agent e, Agent f, Agent g, Agent h) {
         //checks connections and assigns new score to main agent if needed otherwise sets flag to -1
         // also checks if it is in the minority and sets the minority flag to 1
         // will mutate agents string and score if they exploit
@@ -925,8 +927,8 @@ int matrix[100][100]={};
             //cout<<input_agent.id<<"\t"<<new_test<<endl;
         }
         if (input_agent.flag == 0) input_agent.flag = -1;
-    };
-    void Agent::agent_exploit_weighted_inverse(Agent &input_agent, Agent a, Agent b, Agent c, Agent d, Agent e, Agent f, Agent g, Agent h,vector<double> &valscores) {
+    }
+    void Agent::agent_exploit_weighted_inverse(Agent &input_agent, Agent a, Agent b, Agent c, Agent d, Agent e, Agent f, Agent g, Agent h) {
         //checks connections and assigns new score to main agent if needed otherwise sets flag to -1
         // also checks if it is in the minority and sets the minority flag to 1
         // will mutate agents string and score if they exploit
@@ -1055,4 +1057,4 @@ int matrix[100][100]={};
             //cout<<input_agent.id<<"\t"<<new_test<<endl;
         }
         if (input_agent.flag == 0) input_agent.flag = -1;
-    };
+    }

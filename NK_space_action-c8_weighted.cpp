@@ -435,7 +435,7 @@ std::ios::sync_with_stdio(false);
                 i->Agent::agent_exploit_weighted(*i, agent_array[i->connections[0]], agent_array[i->connections[1]],
                                 agent_array[i->connections[2]], agent_array[i->connections[3]],
                                 agent_array[i->connections[4]], agent_array[i->connections[5]],
-                                agent_array[i->connections[6]], agent_array[i->connections[7]],NKspacescore);
+                                agent_array[i->connections[6]], agent_array[i->connections[7]]);
                 //cout<<i->id<<" \033[1;31mid\033[0m "<<i->species<<" \033[1;32mspecies\033[0m "<<" "<<i->mutate_flag<< "\n";
                 //cout<<i->minority<<" minority"<<" \033[1;34mnew_string\033[0m "<<endl;
             }
@@ -444,7 +444,7 @@ std::ios::sync_with_stdio(false);
                 i->Agent::agent_exploit_weighted_inverse(*i, agent_array[i->connections[0]], agent_array[i->connections[1]],
                                 agent_array[i->connections[2]], agent_array[i->connections[3]],
                                 agent_array[i->connections[4]], agent_array[i->connections[5]],
-                                agent_array[i->connections[6]], agent_array[i->connections[7]],NKspacescore);
+                                agent_array[i->connections[6]], agent_array[i->connections[7]]);
             }
         }
 
@@ -460,7 +460,7 @@ std::ios::sync_with_stdio(false);
         {
             if (i->flag == -1) 
             {
-                i->Agent::agent_explore(*i, NKspacevals, NKspacescore,searchm);
+                i->Agent::agent_explore(*i, NKspacescore,searchm);
                 //agent_array[i].agentexplore(agent_array[i],NKspace);
                 //cout<<i->id<<" id \t"<<i->score<<" \033[1;31mnew_score\033[0m "<<i->tempscore<<" \033[1;32mold_score\033[0m "<<"\n";
                 //cout<<i->binarystring<<" \033[1;34mnew_string\033[0m "<<i->tempstring<<" \033[1;33mold_string\033[0m "<<"\n";
@@ -563,7 +563,7 @@ std::ios::sync_with_stdio(false);
         double samespecies=0;
         for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); ++i)
         {
-            for (int j = 0; j < i->connections.size(); ++j)
+            for (uint j = 0; j < i->connections.size(); ++j)
                {
                   if(i->species==agent_array[i->connections[j]].species) samespecies++;
                }   
