@@ -68,6 +68,23 @@ void AB_list(vector<char> &types){//creates list of A and B and  assigns one to 
     }   
 }
 
+void AB_part_25_list(vector<char> &types){//creates list of A and B and  assigns one to an agent at the beginning of every new NK_Space
+    std::vector<char> sp={'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B'};
+
+    for (unsigned int i = 0; i < sp.size(); ++i)
+    {
+        types[i]=sp[i];
+    }   
+}
+
+void AB_part_5_list(vector<char> &types){//creates list of A and B and  assigns one to an agent at the beginning of every new NK_Space
+    std::vector<char> sp={'A', 'A', 'A', 'A', 'A', 'B', 'B', 'B', 'B', 'B', 'A', 'A', 'A', 'A', 'A', 'B', 'B', 'B', 'B', 'B', 'A', 'A', 'A', 'A', 'A', 'B', 'B', 'B', 'B', 'B', 'A', 'A', 'A', 'A', 'A', 'B', 'B', 'B', 'B', 'B', 'A', 'A', 'A', 'A', 'A', 'B', 'B', 'B', 'B', 'B', 'A', 'A', 'A', 'A', 'A', 'B', 'B', 'B', 'B', 'B', 'A', 'A', 'A', 'A', 'A', 'B', 'B', 'B', 'B', 'B', 'A', 'A', 'A', 'A', 'A', 'B', 'B', 'B', 'B', 'B', 'A', 'A', 'A', 'A', 'A', 'B', 'B', 'B', 'B', 'B', 'A', 'A', 'A', 'A', 'A', 'B', 'B', 'B', 'B', 'B'};
+    for (unsigned int i = 0; i < sp.size(); ++i)
+    {
+        types[i]=sp[i];
+    }   
+}
+
 void AB_random_list(vector<char> &types, int inksp){//Random assignment of A and B
 	    int ac=0;
     	int bc=0;
@@ -435,6 +452,8 @@ std::ios::sync_with_stdio(false);
     	}
 	//AB_list_seg(type);
 	//AB_list_deseg(type);
+   	//AB_part_25_list(type);
+    	//AB_part_5_list(type);
 	AB_random_list(type,inksp);
 	open_space_scores(inksp, NKspacescore);
     for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); ++i) 
