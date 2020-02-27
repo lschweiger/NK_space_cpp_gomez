@@ -144,16 +144,51 @@ void AB_list_deseg(vector<char> &types){//creates list of A and B and randomly a
 }
 
 void AB_list_seg(vector<char> &types){//creates list of A and B and randomly assigns one to an agent at the beginning of every new NK_Space
-    vector<char> AB(::agentcounta);
+    //vector<char> AB(::agentcounta);
     for (int i = 0; i < ::agentcounta; ++i) {
         if (i < 50) types[i] = 'A';
         if (i >= 50) types[i] = 'B';
     }
 }
 
+void AB_list_permute(vector<char> &types,int inksp){
+	std::mt19937 gen;
+	gen.seed(inksp+1);
+	for (int i = 0; i < ::agentcounta; ++i) {
+        if (i < 50) types[i] = 'A';
+        if (i >= 50) types[i] = 'B';
+    }
+	std::shuffle ( types.begin(), types.end() ,gen);
+}
 
-
-
+void agent_connections_replacement_number(vector<Agent> &Agents,int inksp){
+	std::mt19937 gen;
+	gen.seed(inksp+1);
+	std::vector<int> A_number={1,1,1,1,1,1,2,2,2,2,2,2,3,3,3,3,3,3,4,4,4,4,4,4,4,5,5,5,5,5,5,5,6,6,6,6,6,6,7,7,7,7,7,7,8,8,8,8,8,8};
+	std::vector<int> B_number={1,1,1,1,1,1,2,2,2,2,2,2,3,3,3,3,3,3,4,4,4,4,4,4,4,5,5,5,5,5,5,5,6,6,6,6,6,6,7,7,7,7,7,7,8,8,8,8,8,8};
+	std::shuffle ( A_number.begin(), A_number.end(),gen);
+	std::shuffle ( B_number.begin(), B_number.end(),gen);
+	int counter=0;
+	for (int i = 0; i < 100; ++i){
+		
+		if(Agents[i].species=='A'){
+			Agents[i].connection_replace=A_number[counter];
+			counter++;
+		}
+		//cout<<counter<<',';
+	
+	}
+	cout<<endl;
+	counter=0;	
+	for (int i = 0; i < 100; ++i){
+		
+		if(Agents[i].species=='B'){
+			Agents[i].connection_replace=B_number[counter];
+			counter++;
+		}
+		//cout<<counter<<',';
+	}
+}
 
 void output_matrix_connections(int NKspace,vector<Agent> Agents,int rounds)
     {// using for checking if agent_swap_hack and agent_swap_con work correctly 
@@ -454,7 +489,9 @@ std::ios::sync_with_stdio(false);
 	//AB_list_deseg(type);
    	//AB_part_25_list(type);
     	//AB_part_5_list(type);
-	AB_random_list(type,inksp);
+	//AB_random_list(type,inksp);
+    AB_list_permute(type,inksp);
+    
 	open_space_scores(inksp, NKspacescore);
     for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); ++i) 
     {// assignment of information to agents, changes for each NK_Space
@@ -471,6 +508,13 @@ std::ios::sync_with_stdio(false);
 
         nums++;
     }
+    agent_connections_replacement_number(agent_array,inksp);
+	/*for(int i=0;i<100;++i){
+		cout<<"new items\n";
+		cout<<agent_array[i].id<<" "<<agent_array[i].species<<" "<<agent_array[i].connection_replace<<" \n";
+
+
+	}*/
 
     for (; rounds < 100; ++rounds) {
     	elts.clear();
