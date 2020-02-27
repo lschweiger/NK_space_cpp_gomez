@@ -520,26 +520,43 @@ int matrix[100][100]={};
         // swaps agent that is in minority; by going through all connections i.e agent 98 will have the potential to get agents 90 through 6's connections
         // will randomly only get 8.
         
-            srand(num);
+            //srand(num);
+            int stop=input_agent.connection_replace;
             vector<int> temp=pool_con(input_agent,a,b,c,d,e,f,g,h);
-            vector<int> newcons(8);
-            for (int i =0; i<8;i++) {
+            vector<int> newcons=input_agent.connections;
+            for (int i =0; i<stop;i++) {
                // cout<<i<<endl;
                 std::uniform_int_distribution<> rands(0, (temp.size()-1));
                 std::random_device rdm;
                 std::mt19937 gen(rdm());
                 int random = rands(gen);
                 rands.reset();
-                while(temp[random]==input_agent.id){// prevents the agent from getting itself as possible connections
+                newcons[i] = temp[random];
+                sort(newcons.begin(), newcons.end());
+                auto last = std::unique(newcons.begin(), newcons.end());
+                newcons.erase(last, newcons.end());
+                newcons.resize(newcons.size());
+                while(newcons.size()!=8){
+                random = rands(gen);
+                rands.reset();
+                newcons.push_back(temp[random]);
+                sort(newcons.begin(), newcons.end());
+                auto last = std::unique(newcons.begin(), newcons.end());
+                newcons.erase(last, newcons.end());
+                newcons.resize(newcons.size());
+
+                }
+                /*while(temp[random]==input_agent.id){// prevents the agent from getting itself as possible connections
                     std::uniform_int_distribution<> rands(0, (temp.size()-1));
                     random = rands(gen);
                     rands.reset();
-                }
-                newcons[i] = temp[random];
+                }*/
+                
                 //cout<<newcons[i]<<" ";
                 temp.erase(temp.begin()+random);
                 temp.resize(temp.size());
             }
+            //cout<<newcons.size()<<' ';
             //cout<<endl;
             //cout<<"new"<<endl;
             for (int j = 0; j <8 ; ++j) {
@@ -548,7 +565,7 @@ int matrix[100][100]={};
                 input_agent.tempconnections[j]=newcons[j];
             }
             sort(input_agent.tempconnections.begin(), input_agent.tempconnections.end());
-        //when down resets flag back to 0, regardless of status
+        //when done resets flag back to 0, regardless of status
         connection_swap(input_agent);
         input_agent.minority=0;
         temp.clear();
@@ -711,7 +728,7 @@ int matrix[100][100]={};
             //matrix_fill_after(input_agent.id,new_cons);            
     }
     void Agent::agent_swap_hack(vector<Agent> &Agents,Agent &input_agent,Agent a, Agent b, Agent c, Agent d, Agent e, Agent f, Agent g, Agent h){
-        for (int i = 0; i < 8; ++i)
+        for (int i = 0; i < input_agent.connection_replace; ++i)
         {
             agent_swap_con(Agents, input_agent, a, b, c, d, e, f, g, h, i);
         }
