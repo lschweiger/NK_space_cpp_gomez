@@ -16,6 +16,7 @@ public:
     double tempscore=0.0;        	//stores temp score if agent exploits
     vector<int> connections=vector<int>(8);        //array of connections will be filled by agentconnections
     vector<int> tempconnections=vector<int>(8);
+    unsigned int connection_replace=8; // number of connections to replace, default is 8 and may be changed.
 
 void agent_connections(int num, Agent &input_agent);
 void agent_change(int num, Agent &input_agent, vector<string> &istring, vector<double> &val);
