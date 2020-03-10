@@ -26,10 +26,10 @@ int na = pow(2, 20);
 const int agentcounta = 100;
 int matrixa[100][100]={};
 
-void open_space_scores(int j, vector<double> &input_vec) {
+void open_space_scores(int j, vector<double> &input_vec,int k) {
     std::ifstream in_scores;
     double i_score;
-    in_scores.open("NK_space_scores_" + to_string(j) + ".txt",std::ios::in | std::ios::binary);
+    in_scores.open("NK_space_scores_"+to_string(k)+"_"+to_string(j)+".txt",std::ios::in | std::ios::binary);
     //while (in_scores>>i_score) {input_vec[i] = i_score; ++i; cout<<input_vec[i]<<endl;}
     for (int i = 0; i < ::na; ++i) {
         in_scores >> i_score;
@@ -243,7 +243,7 @@ void output_scores(int NKspace,vector<Agent> Agents,int rounds){ //outputs all a
 	}
 }
 
-void output_round(int NKspace,int round,vector<int> rounds,vector<double> scr,vector<double> ag,vector<int> mc,vector<int> us,vector<double> pu,int search,int typeout,vector<double> same,vector<double> diff,char method){
+void output_round(int NKspace,int round,vector<int> rounds,vector<double> scr,vector<double> ag,vector<int> mc,vector<int> us,vector<double> pu,int search,int typeout,vector<double> same,vector<double> diff,char method,int k_val){
 	string outtype="";
     string outmethod="";
 	if(typeout==-9)  outtype ="baseline";
@@ -257,7 +257,7 @@ void output_round(int NKspace,int round,vector<int> rounds,vector<double> scr,ve
     if(method=='s') outmethod="info_swap";
     if(method=='b') outmethod="basline";
     if(method=='z') {outmethod="morph";}
-	std::fstream out("8c-NK_space_"+to_string(NKspace)+"_"+outtype+"_SH_"+to_string(search)+"_"+outmethod+".txt",std::ios::out | std::ios::binary);
+	std::fstream out("8c-NK_space_"+to_string(k_val)+'_'+to_string(NKspace)+"_"+outtype+"_SH_"+to_string(search)+"_"+outmethod+".txt",std::ios::out | std::ios::binary);
 	out<<"round,"<<"max score,"<<"avg score,"<<"Number of unique solutions,"<<"percent with max score,"<<"avg similiar species,"<<"avg different species,"<<"minority count"<<"\n";
 	for (int i=0;i<=round; i++){
 		out<<std::setprecision(15)<<rounds[i]<<","<<scr[i]<<","<<ag[i]<<","<<us[i]<<","<<pu[i]<<","<<same[i]<<","<<diff[i]<<","<<mc[i]<<"\n";
@@ -444,14 +444,19 @@ std::ios::sync_with_stdio(false);
 	int rounds = 0;
     int nums = 0;
     int mcount=0;
-#pragma omp parallel for default(none) shared(end,searchm,::na,NKspacevals,NKspace_num,cout,prob,argc,condition,mode,method,::matrixa) firstprivate(max,avgscore,percuni,maxscore,maxround,minoritycount,avgscores,uniquesize,percentuni,NKspacescore,rounds,mcount,agent_array,type,nums,elts,same,diff)   schedule(dynamic,25)
+    vector<int> k_opts={1,5,10,15};
+#pragma omp parallel for default(none) shared(end,searchm,::na,NKspacevals,NKspace_num,cout,prob,argc,condition,mode,method,::matrixa,k_opts) firstprivate(max,avgscore,percuni,maxscore,maxround,minoritycount,avgscores,uniquesize,percentuni,NKspacescore,rounds,mcount,agent_array,type,nums,elts,same,diff)   schedule(dynamic,end/4)
 	for(int inksp=NKspace_num;inksp<end;++inksp){
+		for (int opts = 0; opts < k_opts.size(); ++opts)
+		{
+			
+
 		//srand(inksp+1);
     	cout<<"NK_space #:"<<inksp<<endl;
     	#ifdef _OPENMP
     	cout<<"\t thread #: "<<omp_get_thread_num()<<endl;
     	#endif
-		if(inksp>0)
+		if(inksp>0||opts>0)
 		{
 			agent_array.clear();
 			NKspacescore.clear();
@@ -491,8 +496,8 @@ std::ios::sync_with_stdio(false);
     	//AB_part_5_list(type);
 	//AB_random_list(type,inksp);
     AB_list_permute(type,inksp);
-    
-	open_space_scores(inksp, NKspacescore);
+    cout<<k_opts[opts]<<" "<<inksp<<endl;
+	open_space_scores(inksp, NKspacescore,k_opts[opts]);
     for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); ++i) 
     {// assignment of information to agents, changes for each NK_Space
     	std::uniform_int_distribution<> ids(0,::na); //r
@@ -791,7 +796,8 @@ std::ios::sync_with_stdio(false);
     
     //
     
-    output_round(inksp,rounds,maxround,maxscore,avgscores,minoritycount,uniquesize,percentuni,searchm,condition,same,diff,method);
+    output_round(inksp,rounds,maxround,maxscore,avgscores,minoritycount,uniquesize,percentuni,searchm,condition,same,diff,method,k_opts[opts]);
+	}
 	}
     return 0;
 }
