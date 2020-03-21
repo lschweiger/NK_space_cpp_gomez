@@ -20,11 +20,12 @@ using std::vector;
 #include <random> // probability distribution
 #include <chrono>
 #include <unistd.h>
+#include <filesystem>
 
-#include "Agents4.h"
+#include "Agents6.h"
 int na = (1<<15);
 //const int nbgha = 100;
-const int agentcounta = 20;
+const int agentcounta = 50;
 int matrixa[100][100]={};
 
 void open_space_scores(int j, vector<double> &input_vec,int k) {
@@ -53,7 +54,7 @@ void open_space_string(vector <string> &string_vec) {
 }
 
 void A_list(vector<char> &types){//creates list of A and B and  assigns one to an agent at the beginning of every new NK_Space
-    std::vector<char> sp(20);
+    std::vector<char> sp(::agentcounta);
     std::fill(sp.begin(),sp.end(),'A');
     for (unsigned int i = 0; i < types.size(); ++i)
     {
@@ -90,7 +91,7 @@ void AB_random_list(vector<char> &types, int inksp){//Random assignment of A and
         int ac=0;
         int bc=0;
         int temp=0;
-        for (int i = 0; i < 20; ++i)
+        for (int i = 0; i < ::agentcounta; ++i)
         {
         std::bernoulli_distribution d(0.5);
         std::mt19937 gen;
@@ -153,25 +154,25 @@ void AB_list_seg(vector<char> &types){//creates list of A and B and randomly ass
 }
 
 void AB_list_permute(vector<char> &types,int inksp){
-    //std::mt19937 gen;
-    //gen.seed(inksp+1);
-    cout<<types.size()<<endl;
+    std::mt19937 gen;
+    gen.seed(inksp+1);
+    //cout<<types.size()<<endl;
     for (int i = 0; i < ::agentcounta; ++i) {
         if (i < (::agentcounta/2)) types[i] = 'A';
         if (i >= (::agentcounta/2)) types[i] = 'B';
     }
-      std::random_shuffle ( types.begin(), types.end());
+      std::shuffle ( types.begin(), types.end(),gen);
 }
 
 void agent_connections_replacement_number(vector<Agent> &Agents,int inksp){
     std::mt19937 gen;
     gen.seed(inksp+1);
-    std::vector<int> A_number={1,1,1,1,1,2,2,2,2,2};
-    std::vector<int> B_number={1,1,1,1,1,2,2,2,2,2};
+    std::vector<int> A_number={1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,3,4,4,4,4,4,5,5,5,5,5};
+    std::vector<int> B_number={1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,3,4,4,4,4,4,5,5,5,5,5};
     std::shuffle ( A_number.begin(), A_number.end(),gen);
     std::shuffle ( B_number.begin(), B_number.end(),gen);
     int counter=0;
-    for (int i = 0; i < 10; ++i){
+    for (int i = 0; i < ::agentcounta; ++i){
         
         if(Agents[i].species=='A'){
             Agents[i].connection_replace=A_number[counter];
@@ -182,7 +183,7 @@ void agent_connections_replacement_number(vector<Agent> &Agents,int inksp){
     }
     //cout<<endl;
     counter=0;  
-    for (int i = 0; i < 10; ++i){
+    for (int i = 0; i < ::agentcounta; ++i){
         
         if(Agents[i].species=='B'){
             Agents[i].connection_replace=B_number[counter];
@@ -221,13 +222,13 @@ void output_matrix_connections(int NKspace,vector<Agent> Agents,int rounds)
            }
         }
     }
-void output_connections(int NKspace,vector<Agent> Agents,int rounds){ //outputs all agents connections as a csv file; includes minority status
+void output_connections(int NKspace,vector<Agent> Agents,int rounds,int k){ //outputs all agents connections as a csv file; includes minority status
     std::ofstream out;
-    out.open("agent connections "+to_string(NKspace)+" "+to_string(rounds)+".txt");
+    out.open("agent connections "+to_string(k)+"_"+to_string(NKspace)+" "+to_string(rounds)+".txt");
     out<<"Agent id #"<<","<<"species"<<","<<"connection 0"<<","<<"connection 1"<<","<<"connection 2"<<","<<"connection 3"<<","<<"connection 4"<<","<<"connection 5"<<","<<"connection 6"<<","<<"connection 7"<<","<<"minority status"<<"\n";
     for (vector<Agent>::iterator i = Agents.begin(); i != Agents.end(); i++)
     {
-        out<<i->id<<","<<i->species<<","<<i->connections[0]<<","<<i->connections[1]<<","<<i->connections[2]<<","<<i->connections[3];
+        out<<i->id<<","<<i->species<<","<<i->connections[0]<<","<<i->connections[1]<<","<<i->connections[2]<<","<<i->connections[3]<<","<<i->connections[4]<<","<<i->connections[5];
         if(i->minority==1) 
             {out<<","<<"M"<<"\n";} 
         else
@@ -245,7 +246,7 @@ void output_scores(int NKspace,vector<Agent> Agents,int rounds){ //outputs all a
     }
 }
 
-void output_round(int NKspace,int round,vector<int> rounds,vector<double> scr,vector<double> ag,vector<int> mc,vector<int> us,vector<double> pu,int search,int typeout,vector<double> same,vector<double> diff,char method,int k_val){
+void output_round(int NKspace,int round,vector<int> rounds,vector<double> scr,vector<double> ag,vector<double> mc,vector<int> us,vector<double> pu,int search,int typeout,vector<double> same,vector<double> diff,char method,int k_val){
     string outtype="";
     string outmethod="";
     if(typeout==-9)  outtype ="baseline";
@@ -259,7 +260,11 @@ void output_round(int NKspace,int round,vector<int> rounds,vector<double> scr,ve
     if(method=='s') outmethod="info_swap";
     if(method=='b') outmethod="basline";
     if(method=='z') {outmethod="morph";}
-    std::fstream out("4c-NK_space_"+to_string(k_val)+'_'+to_string(NKspace)+"_"+outtype+"_SH_"+to_string(search)+"_"+outmethod+".txt",std::ios::out | std::ios::binary);
+    std::filesystem::path path=std::filesystem::current_path();
+    path/=outmethod;
+    //cout<<path<<endl;
+    if(!std::filesystem::exists(path)) std::filesystem::create_directory(path);
+    std::fstream out(path.string()+"/6c-NK_space_"+to_string(k_val)+'_'+to_string(NKspace)+"_"+outtype+"_SH_"+to_string(search)+"_"+outmethod+".txt",std::ios::out | std::ios::binary);
     out<<"round,"<<"max score,"<<"avg score,"<<"Number of unique solutions,"<<"percent with max score,"<<"avg similiar species,"<<"avg different species,"<<"minority count"<<"\n";
     for (int i=0;i<=round; i++){
         out<<std::setprecision(15)<<rounds[i]<<","<<scr[i]<<","<<ag[i]<<","<<us[i]<<","<<pu[i]<<","<<same[i]<<","<<diff[i]<<","<<mc[i]<<"\n";
@@ -275,7 +280,7 @@ void swapper(vector<Agent> &v,vector<int> &a,vector<int> &b){ //swaping function
 void swap_agents(vector<Agent> &v,int mode){//swaps minority agents by swaping information
         vector<int> minor;
         vector<int> permute;
-        for (int i = 0; i < 20; ++i)
+        for (int i = 0; i < ::agentcounta ; ++i)
         {
             if(mode==1)
             {
@@ -420,7 +425,7 @@ std::ios::sync_with_stdio(false);
     */
 
     int NKspace_num=start;
-    vector <Agent> agent_array(20);
+    vector <Agent> agent_array(::agentcounta);
     cout.setf(std::ios::fixed);
     cout.setf(std::ios::showpoint);
     cout.precision(15);
@@ -433,7 +438,7 @@ std::ios::sync_with_stdio(false);
     int percuni=0;
     vector<double> maxscore(100);
     vector<int> maxround(100);
-    vector<int> minoritycount(100);
+    vector<double> minoritycount(100);
     vector<double> avgscores(100);
     vector<char> type(::agentcounta);
     vector<int> uniquesize(100);
@@ -446,9 +451,9 @@ std::ios::sync_with_stdio(false);
 
     int rounds = 0;
     int nums = 0;
-    int mcount=0;
+    double mcount=0;
     vector<int> k_opts={1,5,10};
-#pragma omp parallel for default(none) shared(end,searchm,::na,NKspacevals,NKspace_num,cout,prob,argc,condition,mode,method,::matrixa,k_opts,std::cin) firstprivate(max,avgscore,percuni,maxscore,maxround,minoritycount,avgscores,uniquesize,percentuni,NKspacescore,rounds,mcount,agent_array,type,nums,elts,same,diff) schedule(dynamic,100)
+#pragma omp parallel for default(none) shared(end,searchm,::na,NKspacevals,NKspace_num,cout,prob,argc,condition,mode,method,::matrixa,k_opts,std::cin,::agentcounta) firstprivate(max,avgscore,percuni,maxscore,maxround,minoritycount,avgscores,uniquesize,percentuni,NKspacescore,rounds,mcount,agent_array,type,nums,elts,same,diff) schedule(dynamic,100)
     for(int inksp=NKspace_num;inksp<end;++inksp){
         for (int opts = 0; opts < k_opts.size(); ++opts)
         {    
@@ -521,7 +526,7 @@ std::ios::sync_with_stdio(false);
         if(nums==(::agentcounta)) break;
     }
     //cout<<"here\n";
-    agent_connections_replacement_number(agent_array,inksp);
+    //agent_connections_replacement_number(agent_array,inksp);
     //cout<<" after\n";
     /*for(int i=0;i<100;++i){
         cout<<"new items\n";
@@ -578,7 +583,7 @@ std::ios::sync_with_stdio(false);
         for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); ++i) 
         {
             i->Agent::agent_minority_status(*i, agent_array[i->connections[0]], agent_array[i->connections[1]],
-                            agent_array[i->connections[2]], agent_array[i->connections[3]]);
+                            agent_array[i->connections[2]], agent_array[i->connections[3]], agent_array[i->connections[4]],agent_array[i->connections[5]]);
             if (i->minority == 1) 
             {
                 mcount++;
@@ -590,12 +595,12 @@ std::ios::sync_with_stdio(false);
         end of data collection
         */
         //cout<<mcount<<endl;
-        minoritycount[rounds] = mcount/(::agentcounta);
+        minoritycount[rounds] = mcount;
        
         for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); ++i)
         {
             i->Agent::agent_exploit(*i, agent_array[i->connections[0]], agent_array[i->connections[1]],
-                            agent_array[i->connections[2]], agent_array[i->connections[3]],prob,method);
+                            agent_array[i->connections[2]], agent_array[i->connections[3]], agent_array[i->connections[4]],agent_array[i->connections[5]],prob,method);
             //cout<<i->id<<" \033[1;31mid\033[0m "<<i->species<<" \033[1;32mspecies\033[0m "<<" "<<i->mutate_flag<< "\n";
             //cout<<i->minority<<" minority"<<" \033[1;34mnew_string\033[0m "<<endl;
             
@@ -626,7 +631,7 @@ std::ios::sync_with_stdio(false);
         }
         else
         {
-
+            //output_connections(inksp,agent_array,rounds,k_opts[opts]);
             //if argv>=6 and probability is not given all connection manipulations are skipped
                 if(condition==0)
                 {
@@ -646,17 +651,17 @@ std::ios::sync_with_stdio(false);
                       
                            if(mode==1)
                             {//matrix
-                                
                                 method='m';
-                               i->Agent::agent_swap_hack(agent_array,*i,agent_array[i->connections[0]],agent_array[i->connections[1]],agent_array[i->connections[2]], agent_array[i->connections[3]]);
+                               i->Agent::agent_swap_hack(agent_array,*i,agent_array[i->connections[0]], agent_array[i->connections[1]],
+                            agent_array[i->connections[2]], agent_array[i->connections[3]], agent_array[i->connections[4]],agent_array[i->connections[5]]);
                            }
                             if(mode==-1)
                             {// connection reassignment
                                 
                                 method='c';
-                               i->Agent::agent_minority_swap(i->id,*i,
-                                               agent_array[i->connections[0]],agent_array[i->connections[1]],
-                                               agent_array[i->connections[2]], agent_array[i->connections[3]]);
+                               i->Agent::agent_minority_swap(i->id,agent_array,*i,
+                                               agent_array[i->connections[0]], agent_array[i->connections[1]],
+                            agent_array[i->connections[2]], agent_array[i->connections[3]], agent_array[i->connections[4]],agent_array[i->connections[5]]);
                            }
                         }
                     }
@@ -671,15 +676,16 @@ std::ios::sync_with_stdio(false);
                             {
                                 
                                 method='m';
-                               i->agent_swap_hack(agent_array,*i,agent_array[i->connections[0]],agent_array[i->connections[1]],agent_array[i->connections[2]], agent_array[i->connections[3]]);
+                               i->agent_swap_hack(agent_array,*i,agent_array[i->connections[0]], agent_array[i->connections[1]],
+                            agent_array[i->connections[2]], agent_array[i->connections[3]], agent_array[i->connections[4]],agent_array[i->connections[5]]);
                            }
                             if(mode==-1)
                             {
                             
                                 method='c';
-                               i->agent_minority_swap(i->id,*i,
-                                               agent_array[i->connections[0]],agent_array[i->connections[1]],
-                                               agent_array[i->connections[2]], agent_array[i->connections[3]]);
+                               i->agent_minority_swap(i->id,agent_array,*i,
+                                               agent_array[i->connections[0]], agent_array[i->connections[1]],
+                            agent_array[i->connections[2]], agent_array[i->connections[3]], agent_array[i->connections[4]],agent_array[i->connections[5]]);
                            }
                         }
                     }
@@ -772,6 +778,7 @@ std::ios::sync_with_stdio(false);
      *
      *
      */
+
         //output_matrix_connections(inksp,agent_array,rounds);
         //output_connections(inksp,agent_array,rounds);
         if((uniquesize[rounds]==1) || rounds>=70)
