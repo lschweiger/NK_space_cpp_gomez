@@ -20,7 +20,7 @@ using std::vector;
 #include <cstring>
 
 #include "Agents6.h"
-int n = pow(2, 15);
+int n = (1<<15);
 const int nbgh = 50;
 const int connection_number=6;
 //const int agentcount = 100;
@@ -85,15 +85,45 @@ int matrix[100][100]={};
     
     }
 
+    void Agent::agent_minority_status_cons(Agent &input_agent, Agent a, Agent b, Agent c, Agent d,Agent e, Agent f){
+        int minorcalc = 0;
+        int samecalc = 0;
+        if (input_agent.species != a.species) minorcalc++;
+        if (input_agent.species != b.species) minorcalc++;
+        if (input_agent.species != c.species) minorcalc++;
+        if (input_agent.species != d.species) minorcalc++;
+        if (input_agent.species != e.species) minorcalc++;
+        if (input_agent.species != f.species) minorcalc++;
+
+        if (input_agent.species == a.species) samecalc++;
+        if (input_agent.species == b.species) samecalc++;
+        if (input_agent.species == c.species) samecalc++;
+        if (input_agent.species == d.species) samecalc++;
+        if (input_agent.species == e.species) samecalc++;
+        if (input_agent.species == f.species) samecalc++;
+
+        //cout<<minorcalc<<"out"<<endl;
+        if (samecalc<6)
+            {
+               //cout<<minorcalc<<"in"<<endl;
+               //cout<<(samecalc+1)<<endl;
+               //cout<<input_agent.id<<" "<<input_agent.species<<" "<<a.species<<" "<<b.species<<" "<<c.species<<" "<<d.species<<" "<<e.species<<" "<<f.species<<endl;
+               input_agent.minority = 1; 
+               //cout<<input_agent.id<<" minor id "<<" funct "<<input_agent.species<<endl;
+            }
+        else{input_agent.minority=0;}
+    
+    }
+
     void Agent::morph_agent_exp(Agent &input,Agent target,double diffscore){
         std::random_device rd;
         std::binomial_distribution<int> binom (1,(1-std::exp(-diffscore*3.46)));
         int bi=binom(rd);
-    if (bi==1)
+        if (bi==1)
         {
             input.species=target.species;
         }
-    
+        binom.reset();
     }
 
     void Agent::morph_agent_100(Agent &input,Agent target,double prob){
@@ -104,7 +134,7 @@ int matrix[100][100]={};
         {
             input.species=target.species;
         }
-    
+        binom.reset();
     }
 
 
@@ -247,6 +277,7 @@ int matrix[100][100]={};
             // sets to 0 when done, for testing use another number, after testing is done set to 0
             input_agent.flag = 0;
         }
+        randm.reset();
     }
 
     void Agent::agent_explore_B_10(Agent &input_agent, vector<double> &val){
@@ -274,6 +305,7 @@ int matrix[100][100]={};
             // sets to 0 when done, for testing use another number, after testing is done set to 0
             input_agent.flag = 0;
         }
+        randm.reset();
     }
 
     void Agent::agent_explore_A_even(Agent &input_agent, vector<double> &val){
@@ -301,6 +333,7 @@ int matrix[100][100]={};
             // sets to 0 when done, for testing use another number, after testing is done set to 0
             input_agent.flag = 0;
         }
+        randm.reset();
     }
 
     void Agent::agent_explore_B_odd(Agent &input_agent, vector<double> &val){
@@ -328,10 +361,11 @@ int matrix[100][100]={};
             // sets to 0 when done, for testing use another number, after testing is done set to 0
             input_agent.flag = 0;
         }
+        randm.reset();
     }
 
     void Agent::agent_explore_A_swap(Agent &input_agent,  vector<double> &val){
-        std::uniform_int_distribution<> randm(0, 14);
+        std::uniform_int_distribution<> randm(0, 13);
         std::random_device rdm;
         std::mt19937 gen(rdm());
         int random = randm(gen);
@@ -340,7 +374,7 @@ int matrix[100][100]={};
         if (input_agent.flag == -1) {
             //keeps running until flag is not -1
             string temstring = input_agent.binarystring;
-            int temp=temstring[random];
+            char temp=temstring[random];
             temstring[random]=temstring[random+1];
             temstring[random+1]=temp;
             std::bitset<15> newidbinary = std::bitset<15>(temstring);
@@ -353,10 +387,11 @@ int matrix[100][100]={};
             // sets to 0 when done, for testing use another number, after testing is done set to 0
             input_agent.flag = 0;
         }
+        randm.reset();
     }
     void Agent::agent_explore_B_swap(Agent &input_agent, vector<double> &val){
-        std::uniform_int_distribution<> randm(0, 14);
-        std::uniform_int_distribution<> randm2(0, 14);
+        std::uniform_int_distribution<> randm(0, 13);
+        std::uniform_int_distribution<> randm2(0, 13);
         std::random_device rdm;
         std::mt19937_64 gen(rdm());
         int random = randm(gen);
@@ -367,7 +402,7 @@ int matrix[100][100]={};
         if (input_agent.flag == -1) {
             //keeps running until flag is not -1
             string temstring = input_agent.binarystring;
-            int temp=temstring[random];
+            char temp=temstring[random];
             temstring[random]=temstring[random2];
             temstring[random2]=temp;
             std::bitset<15> newidbinary = std::bitset<15>(temstring);
@@ -380,6 +415,8 @@ int matrix[100][100]={};
             // sets to 0 when done, for testing use another number, after testing is done set to 0
             input_agent.flag = 0;
         }
+        randm.reset();
+        randm2.reset();
     }
 
     void Agent::agent_explore_A_flip(Agent &input_agent, vector<double> &val){
@@ -519,7 +556,7 @@ int matrix[100][100]={};
             std::random_device Crdm;
             std::mt19937 genC(Crdm());
             int C=C_potential[c_sel(genC)];
-            
+            c_sel.reset();
             /*cout<<"\n before\n";
             cout<<Agents[A].id<<endl;
             for (int i = 0; i < 6; ++i)
@@ -598,11 +635,11 @@ int matrix[100][100]={};
                     D_potential.push_back(C_cons[i]);
                 }
         }
-
+        c_sel.reset();
         while(D_potential.size()==0)
         {
             C=C_potential[c_sel(Crdm)];
-            vector<int> C_cons=Agents[C].connections;
+            C_cons=Agents[C].connections;
             //cout<<C_potential.size()<<" test 1"<<endl;
             for(unsigned int i=0;i<C_cons.size();i++){ // find and only adds agents for D* from the C* that are not connected to B
                 bool found = false;
@@ -621,12 +658,17 @@ int matrix[100][100]={};
                         }
             }
         }
+
         //cout<<D_potential.size()<<" test 3"<<endl;
         std::uniform_int_distribution<> d_sel(0,D_potential.size()-1);
         std::random_device Drdm;
         std::mt19937 genD(Drdm());
         int D=D_potential[d_sel(genD)];
-        while(D==C||D==B) D=D_potential[d_sel(Drdm)];
+        d_sel.reset();
+        while(D==C||D==B) {
+            D=D_potential[d_sel(Drdm)];
+            d_sel.reset();
+        }
 
         /*
         cout<<"before\n";
@@ -719,21 +761,21 @@ int matrix[100][100]={};
             agent_swap_con(Agents, input_agent, a, b, c, d, e, f,i);
         }
     }
-    void Agent::matrix_fill_before(int id,vector<int> filler)
+    void Agent::matrix_fill_before(int m_id,vector<int> filler)
         {//fills matrix with old connections
             for (unsigned int i = 0; i < filler.size(); i++)
             {
-                ::matrix[id][filler[i]]=1;
-                ::matrix[filler[i]][id]=1;
+                ::matrix[m_id][filler[i]]=1;
+                ::matrix[filler[i]][m_id]=1;
             }
         }
 
-    void Agent::matrix_fill_after(int id,vector<int> filler)
+    void Agent::matrix_fill_after(int m_id,vector<int> filler)
         {// fill matrix with new connection
             for (unsigned int i = 0; i < filler.size(); i++)
             {
-                ::matrix[id][filler[i]]=5;
-                ::matrix[filler[i]][id]=5;
+                ::matrix[m_id][filler[i]]=5;
+                ::matrix[filler[i]][m_id]=5;
             }
         }
     void Agent::matrix_print(vector<Agent> agent_array)
@@ -771,7 +813,7 @@ int matrix[100][100]={};
 		std::random_device rdm;
 		std::mt19937_64 gen(rdm());
 		std::binomial_distribution<int> binom (1,epsilon);
-		int flag=0;
+		int f_flag=0;
 		int probchange=binom(gen);
 		/*
 		int minorcalc = 0;
@@ -790,14 +832,15 @@ int matrix[100][100]={};
     			if(input_agent.species=='A')
     			{
     				input_agent.species='B';
-    				flag=1;
+    				f_flag=1;
     				cout<<"change "<<input_agent.species<<endl;
     			}
-    			if(flag==0 && input_agent.species=='B')
+    			if(f_flag==0 && input_agent.species=='B')
     			{
     				input_agent.species='A';
     				cout<<"change "<<input_agent.species<<endl;
     			}
+                binom.reset();
     		}
 		//cout<<"agent species after "<<input_agent.species<<endl;
 	}

@@ -10,8 +10,8 @@ public:
     int id=0;
     int flag = 0;				//flag is use in swap and exploit
     //int mutate_flag=0;          // flag for debugging mutate function 
-    string binarystring="0000000000000000";    	//stores main string
-    string tempstring="000000000000000";        	//stores temp string if agent exploits
+    string binarystring="000000000000000";    	//stores main string
+    string tempstring=  "000000000000000";        	//stores temp string if agent exploits
     double score=0.0;            	//stores primary score
     double tempscore=0.0;        	//stores temp score if agent exploits
     vector<int> connections=vector<int>(6);        //array of connections will be filled by agentconnections
@@ -22,6 +22,7 @@ public:
 void agent_connections(int num, Agent &input_agent);
 void agent_change(int num, Agent &input_agent, vector<string> &istring, vector<double> &val);
 void agent_minority_status(Agent &input_agent, Agent a, Agent b, Agent c, Agent d, Agent e, Agent f);
+void agent_minority_status_cons(Agent &input_agent, Agent a, Agent b, Agent c, Agent d,Agent e, Agent f);
 void morph_agent_exp(Agent &input,Agent target,double diffscore);
 void morph_agent_100(Agent &input,Agent target,double prob);
 void agent_exploit(Agent &input_agent, Agent a, Agent b, Agent c, Agent d, Agent e, Agent f,double prob,char method);
