@@ -42,6 +42,20 @@ void open_space_scores(int j, vector<double> &input_vec,int k) {
     in_scores.close();
 }
 
+void open_space_scores_R(int j, vector<double> &input_vec,int k) {//scores generated with R code
+    std::ifstream in_scores;
+    double i_score;
+    in_scores.open("4_NK_space_scores_"+to_string(k)+"_"+to_string(j)+"_R.txt",std::ios::in | std::ios::binary);
+    //while (in_scores>>i_score) {input_vec[i] = i_score; ++i; cout<<input_vec[i]<<endl;}
+    for (int i = 0; i < ::na; ++i) {
+        in_scores >> i_score;
+        //cout<<i_score<<"test"<<'\n';
+        input_vec[i] = i_score;
+        //cout<<input_vec[i]<<'\n';
+    }
+    in_scores.close();
+}
+
 void open_space_string(vector <string> &string_vec) {
     std::fstream strings;
     strings.open("NK_space_strings.txt");
@@ -93,15 +107,15 @@ void AB_random_list(vector<char> &types, int inksp){//Random assignment of A and
         int temp=0;
         for (int i = 0; i < ::agentcounta; ++i)
         {
-        std::bernoulli_distribution d(0.5);
-        std::mt19937 gen;
-        gen.seed(inksp+i);
-        
-        temp=d(gen);
-        if(temp==1) {types[i]='A'; ac++;}
-        if(temp==0) {types[i]='B'; bc++;}
-        //cout<<temp<< ":V C:"<<types[i]<<" ";
-        d.reset();
+            std::bernoulli_distribution d(0.5);
+            std::mt19937 gen;
+            gen.seed(inksp+i);
+            
+            temp=d(gen);
+            if(temp==1) {types[i]='A'; ac++;}
+            if(temp==0) {types[i]='B'; bc++;}
+            //cout<<temp<< ":V C:"<<types[i]<<" ";
+            d.reset();
         }
         //cout<<endl;
         //cout<<ac<<":A B:"<<bc<<endl;
@@ -358,7 +372,7 @@ std::ios::sync_with_stdio(false);
     }
     if(method=='z'){
         cout<<"Morhping will be used\nIf not desired, pass -M q\n";
-        if(prob==-1) {
+        if(prob==-1.0) {
             cout<<"using exponetial probability function in Morhping\n Pass # 0<=P<=1 for raw probability\n";
             condition=100;
         }
@@ -453,7 +467,7 @@ std::ios::sync_with_stdio(false);
     int nums = 0;
     double mcount=0;
     vector<int> k_opts={1,5,10};
-#pragma omp parallel for default(none) shared(end,searchm,::na,NKspacevals,NKspace_num,cout,prob,argc,condition,mode,method,::matrixa,k_opts,std::cin,::agentcounta) firstprivate(max,avgscore,percuni,maxscore,maxround,minoritycount,avgscores,uniquesize,percentuni,NKspacescore,rounds,mcount,agent_array,type,nums,elts,same,diff) schedule(dynamic,100)
+#pragma omp parallel for default(none) shared(end,searchm,::na,NKspacevals,NKspace_num,cout,prob,argc,condition,mode,method,::matrixa,k_opts,std::cin,::agentcounta) firstprivate(max,avgscore,percuni,maxscore,maxround,minoritycount,avgscores,uniquesize,percentuni,NKspacescore,rounds,mcount,agent_array,type,nums,elts,same,diff) schedule(dynamic,50)
     for(int inksp=NKspace_num;inksp<end;++inksp){
         for (int opts = 0; opts < k_opts.size(); ++opts)
         {    
@@ -504,7 +518,7 @@ std::ios::sync_with_stdio(false);
     AB_random_list(type,inksp);
     //AB_list_permute(type,inksp);
     cout<<k_opts[opts]<<" "<<inksp<<endl;
-    open_space_scores(inksp, NKspacescore,k_opts[opts]);
+    open_space_scores_R(inksp, NKspacescore,k_opts[opts]);
     //cout<<NKspacescore.size();
     for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); ++i) 
     {// assignment of information to agents, changes for each NK_Space
@@ -523,6 +537,7 @@ std::ios::sync_with_stdio(false);
         i->Agent::agent_change(rnums, *i, NKspacevals, NKspacescore);
 
         nums++;
+        ids.reset();
         if(nums==(::agentcounta)) break;
     }
     //cout<<"here\n";
@@ -582,13 +597,28 @@ std::ios::sync_with_stdio(false);
         mcount = 0;
         for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); ++i) 
         {
-            i->Agent::agent_minority_status(*i, agent_array[i->connections[0]], agent_array[i->connections[1]],
-                            agent_array[i->connections[2]], agent_array[i->connections[3]], agent_array[i->connections[4]],agent_array[i->connections[5]]);
-            if (i->minority == 1) 
-            {
-                mcount++;
+            if(mode!=-1){
+                //cout<<"mode 1\n";
+                i->Agent::agent_minority_status(*i, agent_array[i->connections[0]], agent_array[i->connections[1]],
+                                agent_array[i->connections[2]], agent_array[i->connections[3]], agent_array[i->connections[4]],agent_array[i->connections[5]]);
+                if (i->minority == 1) 
+                {
+                    mcount++;
+                }
+                i->minority=0;
             }
-            i->minority=0;
+            if(mode==-1){
+                //cout<<"mode -1\n";
+                i->Agent::agent_minority_status_cons(*i, agent_array[i->connections[0]], agent_array[i->connections[1]],
+                                agent_array[i->connections[2]], agent_array[i->connections[3]], agent_array[i->connections[4]],agent_array[i->connections[5]]);
+                if (i->minority == 1) 
+                {
+                    mcount++;
+                }
+                i->minority=0;
+                }
+                
+            
         }
         
         /*
