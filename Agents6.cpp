@@ -474,6 +474,122 @@ int matrix[100][100]={};
         }
     }
     
+    void Agent::agent_explore_random_1(Agent &input_agent, vector<double> &val){
+        std::uniform_int_distribution<> randm(0, 13);
+        std::random_device rdm;
+        std::mt19937 gen(rdm());
+        int random = randm(gen);
+        //cout<<random<<endl;
+        //checks if flag is really -1
+        if (input_agent.flag == -1) {
+
+            string temstring = input_agent.binarystring;
+            //cout<<"1 old string "<<temstring<<endl;
+            temstring[random] ='1';
+            //cout<<"\t new string "<<tempstring<<endl;
+            std::bitset<15> newidbinary = std::bitset<15>(temstring);
+            int newid=newidbinary.to_ulong();
+            //cout<<"\t new score "<<val[newid]<<endl;
+            
+            // if new string and score are better assigns them to agent
+            if (input_agent.score < val[newid]) {
+                input_agent.score = val[newid];
+                input_agent.tempstring = temstring;
+            }
+            // sets to 0 when done, for testing use another number, after testing is done set to 0
+            input_agent.flag = 0;
+        }
+        randm.reset();
+    }
+
+    void Agent::agent_explore_random_0(Agent &input_agent, vector<double> &val){
+        std::uniform_int_distribution<> randm(0, 13);
+        std::random_device rdm;
+        std::mt19937 gen(rdm());
+        int random = randm(gen);
+        //cout<<random<<endl;
+        //checks if flag is really -1
+        if (input_agent.flag == -1) {
+
+            string temstring = input_agent.binarystring;
+            //cout<<"0 old string "<<temstring<<endl;
+            temstring[random] ='0';
+            //cout<<"\t new string "<<temstring<<endl;
+            std::bitset<15> newidbinary = std::bitset<15>(temstring);
+            int newid=newidbinary.to_ulong();
+            // if new string and score are better assigns them to agent
+            if (input_agent.score < val[newid]) {
+                input_agent.score = val[newid];
+                input_agent.tempstring = temstring;
+            }
+            // sets to 0 when done, for testing use another number, after testing is done set to 0
+            input_agent.flag = 0;
+        }
+        randm.reset();
+    }
+
+    void Agent::agent_explore_flip(Agent &input_agent, vector<double> &val){
+        std::uniform_int_distribution<> randm(0, 13);
+        std::random_device rdm;
+        std::mt19937 gen(rdm());
+        int random = randm(gen);
+        //checks if flag is really -1
+        if (input_agent.flag == -1) {
+            string temstring = input_agent.binarystring;
+            //cout<<"flip old string "<<temstring<<endl;
+                if (temstring[random] == '1')
+                {
+                    temstring[random] = '0';
+                } 
+                else {
+                    temstring[random] = '1';
+                }
+            //cout<<"\t new string "<<temstring<<endl;
+            std::bitset<15> newidbinary = std::bitset<15>(temstring);
+            int newid=newidbinary.to_ulong();
+            // if new string and score are better assigns them to agent
+            if (input_agent.score < val[newid]) {
+                input_agent.score = val[newid];
+                input_agent.tempstring = temstring;
+            }
+            // sets to 0 when done, for testing use another number, after testing is done set to 0
+            input_agent.flag = 0;
+        }
+        randm.reset();
+    }
+
+    void Agent::agent_explore_shuffle(Agent &input_agent, vector<double> &val){
+        std::uniform_int_distribution<> rands(0, 6);
+        std::uniform_int_distribution<> rande(7, 13);
+        std::random_device rds;
+        std::random_device rde;
+        std::random_device rdshuf;
+        std::mt19937 gens(rds());
+        std::mt19937 gene(rde());
+        std::mt19937 genshuf(rdshuf());
+        int random_start = rands(gens);
+        int random_end = rande(gene);
+        unsigned int seed=0;
+        //checks if flag is really -1
+        if (input_agent.flag == -1) {
+            //cout<<"shuffle "<<input_agent.binarystring<<endl;
+            string temstring = input_agent.binarystring;
+            //cout<<"old string "<<temstring<<endl;
+            std::shuffle(temstring.begin()+random_start,temstring.begin()+random_end,genshuf);
+            //cout<<"\t new string "<<temstring<<endl;
+            std::bitset<15> newidbinary = std::bitset<15>(temstring);
+            int newid=newidbinary.to_ulong();
+            // if new string and score are better assigns them to agent
+            if (input_agent.score < val[newid]) {
+                input_agent.score = val[newid];
+                input_agent.tempstring = temstring;
+            }
+            // sets to 0 when done, for testing use another number, after testing is done set to 0
+            input_agent.flag = 0;
+        }
+        rands.reset();
+        rande.reset();
+    }
 
     void Agent::agent_explore(Agent &input_agent, vector<double> &val,int search) {
         // if agent with flag -1 will explore
@@ -486,6 +602,20 @@ int matrix[100][100]={};
         if(input_agent.species=='B' && search==2) agent_explore_B_swap(input_agent,val);
         if(input_agent.species=='A' && search==3) agent_explore_A_flip(input_agent,val);
         if(input_agent.species=='B' && search==3) agent_explore_B_flip(input_agent,val);
+        
+    }
+
+    void Agent::agent_explore_new(Agent &input_agent, vector<double> &val,int Asearch,int Bsearch) {
+        // if agent with flag -1 will explore
+        //cout<<search<<endl;
+        if(input_agent.species=='A' && Asearch==0) agent_explore_random_0(input_agent,val);
+        if(input_agent.species=='B' && Bsearch==0) agent_explore_random_0(input_agent,val);
+        if(input_agent.species=='A' && Asearch==1) agent_explore_random_1(input_agent,val);
+        if(input_agent.species=='B' && Bsearch==1) agent_explore_random_1(input_agent,val);
+        if(input_agent.species=='A' && Asearch==2) agent_explore_flip(input_agent,val);
+        if(input_agent.species=='B' && Bsearch==2) agent_explore_flip(input_agent,val);
+        if(input_agent.species=='A' && Asearch==3) agent_explore_shuffle(input_agent,val);
+        if(input_agent.species=='B' && Bsearch==3) agent_explore_shuffle(input_agent,val);
         
     }
 
