@@ -263,6 +263,7 @@ void output_scores(int NKspace,vector<Agent> Agents,int rounds){ //outputs all a
 void output_round(int NKspace,int round,vector<int> rounds,vector<double> scr,vector<double> ag,vector<double> mc,vector<int> us,vector<double> pu,int search,int typeout,vector<double> same,vector<double> diff,char method,int k_val){
     string outtype="";
     string outmethod="";
+    if(search==9) search=999;
     if(typeout==-9)  outtype ="baseline";
     if(typeout==-1)  outtype="minority";
     if(typeout==1)  outtype ="majority";
@@ -277,6 +278,7 @@ void output_round(int NKspace,int round,vector<int> rounds,vector<double> scr,ve
     std::filesystem::path path=std::filesystem::current_path();
     path/=outmethod;
     //cout<<path<<endl;
+    //cout<<outmethod<<endl;
     if(!std::filesystem::exists(path)) std::filesystem::create_directory(path);
     std::fstream out(path.string()+"/6c-NK_space_"+to_string(k_val)+'_'+to_string(NKspace)+"_"+outtype+"_SH_"+to_string(search)+"_"+outmethod+".txt",std::ios::out | std::ios::binary);
     out<<"round,"<<"max score,"<<"avg score,"<<"Number of unique solutions,"<<"percent with max score,"<<"avg similiar species,"<<"avg different species,"<<"minority count"<<"\n";
@@ -643,12 +645,13 @@ std::ios::sync_with_stdio(false);
             //cout<<i->binarystring<<" \033[1;34mnew_string\033[0m "<<i->tempstring<<" \033[1;33mold_string\033[0m "<<"\n";
         }
 
-
+        int A_sel= rand()%4;
+        int B_sel= rand()%4;
         for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); ++i) 
         {
             if (i->flag == -1) 
             {
-                i->Agent::agent_explore(*i, NKspacescore,searchm);
+                i->Agent::agent_explore_new(*i, NKspacescore,A_sel,B_sel);
                 //agent_array[i].agentexplore(agent_array[i],NKspace);
                 //cout<<i->id<<" id \t"<<i->score<<" \033[1;31mnew_score\033[0m "<<i->tempscore<<" \033[1;32mold_score\033[0m "<<"\n";
                 //cout<<i->binarystring<<" \033[1;34mnew_string\033[0m "<<i->tempstring<<" \033[1;33mold_string\033[0m "<<"\n";
