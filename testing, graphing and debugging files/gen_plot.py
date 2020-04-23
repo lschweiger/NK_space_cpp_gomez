@@ -3,9 +3,9 @@ import glob
 import csv
 import gc
 
-list=glob.glob('*scores_1_500_*R.txt')
-list.append(glob.glob('*scores_5_635_*R.txt')[0])
-list.append(glob.glob('*scores_10_665_*R.txt')[0])
+list=glob.glob('*scores_1_500_*.txt')
+list.append(glob.glob('*scores_5_635_*.txt')[0])
+list.append(glob.glob('*scores_10_665_*.txt')[0])
 
 def plots(files):
 	for i in files:
