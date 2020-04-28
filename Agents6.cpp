@@ -55,7 +55,7 @@ int matrix[100][100]={};
         input_agent.binarystring = istring[num];
     }
 
-    void Agent::agent_minority_status(Agent &input_agent, Agent a, Agent b, Agent c, Agent d,Agent e, Agent f){
+    void Agent::agent_minority_status_symmetric(Agent &input_agent, Agent a, Agent b, Agent c, Agent d,Agent e, Agent f){
         int minorcalc = 0;
         int samecalc = 0;
         if (input_agent.species != a.species) minorcalc++;
@@ -85,7 +85,7 @@ int matrix[100][100]={};
     
     }
 
-    void Agent::agent_minority_status_cons(Agent &input_agent, Agent a, Agent b, Agent c, Agent d,Agent e, Agent f){
+    void Agent::agent_minority_status_asymmetric(Agent &input_agent, Agent a, Agent b, Agent c, Agent d,Agent e, Agent f,int Criterion){ //minority calculation for connections method
         int minorcalc = 0;
         int samecalc = 0;
         if (input_agent.species != a.species) minorcalc++;
@@ -103,7 +103,7 @@ int matrix[100][100]={};
         if (input_agent.species == f.species) samecalc++;
 
         //cout<<minorcalc<<"out"<<endl;
-        if (samecalc<6)
+        if (samecalc<Criterion)
             {
                //cout<<minorcalc<<"in"<<endl;
                //cout<<(samecalc+1)<<endl;
@@ -138,7 +138,7 @@ int matrix[100][100]={};
     }
 
 
-    void Agent::agent_exploit(Agent &input_agent, Agent a, Agent b, Agent c, Agent d, Agent e, Agent f,double prob,char method) {
+    void Agent::agent_exploit(Agent &input_agent, Agent a, Agent b, Agent c, Agent d, Agent e, Agent f,double prob,char method,int mode, int Criterion) {
         //checks connections and assigns new score to main agent if needed otherwise sets flag to -1
         // also checks if it is in the minority and sets the minority flag to 1
         // will mutate agents string and score if they exploit
@@ -159,7 +159,8 @@ int matrix[100][100]={};
 		input_agent.minority = 1; cout<<input_agent.id<<" minor id "<<" exploit "<<input_agent.species<<endl;}
     	*/
         
-        agent_minority_status(input_agent,a,b,c,d,e,f);
+        if(mode==1)agent_minority_status_symmetric(input_agent,a,b,c,d,e,f);
+        if(mode==-1)agent_minority_status_asymmetric(input_agent,a,b,c,d,e,f,Criterion);
         //cout<<"minority status "<<input_agent.minority<<endl;
         //score update
         int target_id=-1;
@@ -621,7 +622,7 @@ int matrix[100][100]={};
 
     std::vector<int> pool_con(Agent input_agent,Agent a, Agent b, Agent c, Agent d,Agent e, Agent f){
         vector<int> temp(36);
-        for(int i=0;i<4;i++){// fills temp with all possible connections including duplicates, will also fill temp up simultaneously from the other 8 agents
+        for(int i=0;i<4;i++){// fills temp with all possible connections including duplicates, will also fill temp up simultaneously from the other 6 agents
             temp[i]=a.connections[i];
                 //cout<<a.id<<"id "<<a.connections[i]<<" a con"<<endl;
             temp[6+i]=b.connections[i];
@@ -647,22 +648,20 @@ int matrix[100][100]={};
     void Agent::connection_swap(Agent &input_agent){// set connections equal to temp connection and clears, resize temp for future uses; for testing only
         input_agent.connections=input_agent.tempconnections;
         input_agent.tempconnections.clear();
-        input_agent.tempconnections.resize(4);
+        input_agent.tempconnections.resize(6);
     }
 
-    void Agent::agent_minority_swap(int num,vector<Agent> &Agents,Agent &input_agent,Agent a, Agent b, Agent c, Agent d,Agent e, Agent f){
+    void Agent::agent_asymmetric_swap(int num,vector<Agent> &Agents,Agent &input_agent,Agent a, Agent b, Agent c, Agent d,Agent e, Agent f,int loop){
         // swaps agent that is in minority; by going through all connections i.e agent 98 will have the potential to get agents 90 through 6's connections
-        // will randomly only get 8.
+        // will randomly only get 6.
+        // loops internally through the value of input_agent.connection_replace
         
         int A=input_agent.id; //input agent named A 
         vector<int> pool=pool_con(input_agent,a,b,c,d,e,f); //set of all 1st degree connected agents that we pick C* from
         vector<int> old_cons=input_agent.connections;
         vector<int> C_potential;
-        vector<int> D_potential;
-        for (int i = 0; i < input_agent.connection_replace; ++i)
-        {
-            int B=old_cons[i];
-            //cout<<"here\n";
+        int B=old_cons[loop];
+
             //cout<<input_agent.id<<endl;
             for(unsigned int i=0;i<pool.size();i++){ //find and only adds agents for C* from the pool that are not connected to A
                 bool found = false;
@@ -680,8 +679,10 @@ int matrix[100][100]={};
                     }
             }
 
-            //if(C_potential.size()==0) throw(static_cast<int>(C_potential.size()));
-            //cout<<C_potential.size()<<" test 1"<<endl;
+            if(C_potential.size()==0){
+                C_potential.push_back(B);
+            }
+            
             std::uniform_int_distribution<> c_sel(0,C_potential.size()-1); //random selection of C* from C_potential.
             std::random_device Crdm;
             std::mt19937 genC(Crdm());
@@ -696,7 +697,7 @@ int matrix[100][100]={};
             std::vector<int>::iterator ABit = std::find(Agents[A].connections.begin(), Agents[A].connections.end(), B);
             int ABindex = std::distance(Agents[A].connections.begin(), ABit);
             Agents[A].connections[ABindex]=C;
-        }
+
 
         /*cout<<"\n after\n";
                 for (int i = 0; i < 6; ++i)
@@ -711,10 +712,8 @@ int matrix[100][100]={};
     
 
 
-    void Agent::agent_swap_con(vector<Agent> &Agents,Agent &input_agent,Agent a, Agent b, Agent c, Agent d, Agent e, Agent f,int loop){ //swaps an agents connection using the adjacency matrix
-        //matrix_fill_before(input_agent.id,input_agent.connections);
-        //std::default_random_engine generator (2);
-        //try
+    void Agent::agent_swap_symmetric(vector<Agent> &Agents,Agent &input_agent,Agent a, Agent b, Agent c, Agent d, Agent e, Agent f,int loop){ //swaps an agents connection using the adjacency matrix
+        //loops from the outside using the function agent_swap_hack
         
         int A=input_agent.id; //input agent named A 
         //std::uniform_int_distribution<> selected(0, input_agent.connections.size()-1); //random selction for B
@@ -725,7 +724,6 @@ int matrix[100][100]={};
         vector<int> C_potential;
         vector<int> D_potential;
         int B=old_cons[loop];
-        //cout<<"here\n";
         //cout<<input_agent.id<<endl;
         for(unsigned int i=0;i<pool.size();i++){ //find and only adds agents for C* from the pool that are not connected to A
             bool found = false;
@@ -885,12 +883,20 @@ int matrix[100][100]={};
         }
         */           
     }
-    void Agent::agent_swap_hack(vector<Agent> &Agents,Agent &input_agent,Agent a, Agent b, Agent c, Agent d,Agent e, Agent f){
+    void Agent::agent_swap_hack_symmetric(vector<Agent> &Agents,Agent &input_agent,Agent a, Agent b, Agent c, Agent d,Agent e, Agent f){ //used for the matrix method to loop through connection_replace and replace
         for (int i = 0; i < input_agent.connection_replace; ++i)
         {
-            agent_swap_con(Agents, input_agent, a, b, c, d, e, f,i);
+            agent_swap_symmetric(Agents, input_agent, a, b, c, d, e, f,i);
         }
     }
+
+    void Agent::agent_swap_hack_asymmetric(int num,vector<Agent> &Agents,Agent &input_agent,Agent a, Agent b, Agent c, Agent d,Agent e, Agent f,int Criterion){ //used for the connection method to loop through connection_replace and replace connections
+        for (int i = 0; i < input_agent.connection_replace; ++i)
+        {
+            agent_asymmetric_swap(num,Agents, input_agent, a, b, c, d, e, f,i);
+        }
+    }
+
     void Agent::matrix_fill_before(int m_id,vector<int> filler)
         {//fills matrix with old connections
             for (unsigned int i = 0; i < filler.size(); i++)
@@ -974,7 +980,7 @@ int matrix[100][100]={};
     		}
 		//cout<<"agent species after "<<input_agent.species<<endl;
 	}
-    void Agent::agent_exploit_weighted(Agent &input_agent, Agent a, Agent b, Agent c, Agent d,Agent e, Agent f) {
+    void Agent::agent_exploit_weighted(Agent &input_agent, Agent a, Agent b, Agent c, Agent d,Agent e, Agent f,int mode,int Criterion) {
         //checks connections and assigns new score to main agent if needed otherwise sets flag to -1
         // also checks if it is in the minority and sets the minority flag to 1
         // will mutate agents string and score if they exploit
@@ -1001,7 +1007,8 @@ int matrix[100][100]={};
         input_agent.minority = 1; cout<<input_agent.id<<" minor id "<<" exploit "<<input_agent.species<<endl;}
         */
         
-        Agent::agent_minority_status(input_agent,a,b,c,d,e,f);
+        if(mode==1)agent_minority_status_symmetric(input_agent,a,b,c,d,e,f);
+        if(mode==-1)agent_minority_status_asymmetric(input_agent,a,b,c,d,e,f,Criterion);
         //cout<<"minority status "<<input_agent.minority<<endl;
         //score update
         int target_id=-1;
@@ -1083,7 +1090,7 @@ int matrix[100][100]={};
         }
         if (input_agent.flag == 0) input_agent.flag = -1;
     }
-    void Agent::agent_exploit_weighted_inverse(Agent &input_agent, Agent a, Agent b, Agent c, Agent d,Agent e, Agent f) {
+    void Agent::agent_exploit_weighted_inverse(Agent &input_agent, Agent a, Agent b, Agent c, Agent d,Agent e, Agent f,int mode,int Criterion) {
         //checks connections and assigns new score to main agent if needed otherwise sets flag to -1
         // also checks if it is in the minority and sets the minority flag to 1
         // will mutate agents string and score if they exploit
@@ -1110,7 +1117,8 @@ int matrix[100][100]={};
         input_agent.minority = 1; cout<<input_agent.id<<" minor id "<<" exploit "<<input_agent.species<<endl;}
         */
         
-        Agent::agent_minority_status(input_agent,a,b,c,d,e,f);
+        if(mode==1)agent_minority_status_symmetric(input_agent,a,b,c,d,e,f);
+        if(mode==-1)agent_minority_status_asymmetric(input_agent,a,b,c,d,e,f,Criterion);
         //cout<<"minority status "<<input_agent.minority<<endl;
         //score update
         int target_id=-1;

@@ -21,11 +21,11 @@ public:
 
 void agent_connections(int num, Agent &input_agent);
 void agent_change(int num, Agent &input_agent, vector<string> &istring, vector<double> &val);
-void agent_minority_status(Agent &input_agent, Agent a, Agent b, Agent c, Agent d, Agent e, Agent f);
-void agent_minority_status_cons(Agent &input_agent, Agent a, Agent b, Agent c, Agent d,Agent e, Agent f);
+void agent_minority_status_symmetric(Agent &input_agent, Agent a, Agent b, Agent c, Agent d, Agent e, Agent f);
+void agent_minority_status_asymmetric(Agent &input_agent, Agent a, Agent b, Agent c, Agent d,Agent e, Agent f, int Criterion);
 void morph_agent_exp(Agent &input,Agent target,double diffscore);
 void morph_agent_100(Agent &input,Agent target,double prob);
-void agent_exploit(Agent &input_agent, Agent a, Agent b, Agent c, Agent d, Agent e, Agent f,double prob,char method);
+void agent_exploit(Agent &input_agent, Agent a, Agent b, Agent c, Agent d, Agent e, Agent f,double prob,char method,int mode,int Criterion);
 void agent_swap_interal_info(Agent &input_agent);
 void agent_explore_A_10(Agent &input_agent, vector<double> &val);
 void agent_explore_B_10(Agent &input_agent, vector<double> &val);
@@ -41,16 +41,17 @@ void agent_explore_flip(Agent &input_agent, vector<double> &val);
 void agent_explore_shuffle(Agent &input_agent, vector<double> &val);
 void agent_explore(Agent &input_agent, vector<double> &val,int search);
 void agent_explore_new(Agent &input_agent, vector<double> &val,int Asearch,int Bsearch);
-void connection_swap(Agent &input_agent);
-void agent_minority_swap(int num,vector<Agent> &Agents,Agent &input_agent,Agent a, Agent b, Agent c, Agent d, Agent e, Agent f);
-void agent_swap_con(vector<Agent> &Agents,Agent &input_agent,Agent a, Agent b, Agent c, Agent d,  Agent e, Agent f,int loop);
-void agent_swap_hack(vector<Agent> &Agents,Agent &input_agent,Agent a, Agent b, Agent c, Agent d, Agent e, Agent f);
-void matrix_fill_before(int id,vector<int> filler);
-void matrix_fill_after(int id,vector<int> filler);
-void matrix_print(vector<Agent> agent_array);
+void connection_swap(Agent &input_agent); //swaps connections with tempconnections;
+void agent_asymmetric_swap(int num,vector<Agent> &Agents,Agent &input_agent,Agent a, Agent b, Agent c, Agent d, Agent e, Agent f, int loop);//connections method swap
+void agent_swap_symmetric(vector<Agent> &Agents,Agent &input_agent,Agent a, Agent b, Agent c, Agent d,  Agent e, Agent f,int loop);//matrix method swap
+void agent_swap_hack_asymmetric(int num,vector<Agent> &Agents,Agent &input_agent,Agent a, Agent b, Agent c, Agent d,Agent e, Agent f,int Criterion);//solution to solving more than one connection swapped
+void agent_swap_hack_symmetric(vector<Agent> &Agents,Agent &input_agent,Agent a, Agent b, Agent c, Agent d, Agent e, Agent f);//same as above
+void matrix_fill_before(int id,vector<int> filler); //debugging
+void matrix_fill_after(int id,vector<int> filler);//debugging
+void matrix_print(vector<Agent> agent_array);//debugging
 void swap_species(Agent &input_agent,double& epsilon);
-void agent_exploit_weighted(Agent &input_agent, Agent a, Agent b, Agent c, Agent d, Agent e, Agent f);
-void agent_exploit_weighted_inverse(Agent &input_agent, Agent a, Agent b, Agent c, Agent d, Agent e, Agent f);
+void agent_exploit_weighted(Agent &input_agent, Agent a, Agent b, Agent c, Agent d, Agent e, Agent f,int mode,int Criterion);
+void agent_exploit_weighted_inverse(Agent &input_agent, Agent a, Agent b, Agent c, Agent d, Agent e, Agent f,int mode,int Criterion);
 };
 
 
