@@ -14,6 +14,8 @@ using std::ofstream;
 #include <ios>
 #include <iomanip>
 #include <cstdlib>
+//#include <execution>
+//#include <mutex>
 
 //declare the uniform distribution, uni for use globally
 double num=240;
@@ -98,7 +100,7 @@ void NKspacevals_highk(vector<double>& input_vec,int k_val){
 	std::vector<double> diff(vec.size());
 	std::transform(vec.begin(), vec.end(), diff.begin(), [mean](double x) { return x - mean; });// using transform to compute sum of X_i -X_mean; lambda function
 	double sq_sum = std::inner_product(diff.begin(), diff.end(), diff.begin(), 0.0); //using inner product to compute dot product for sum of squared
-	double stdev = std::sqrt(sq_sum / vec.size()); // standard deviation
+	double stdev = std::sqrt(sq_sum / (vec.size()-1)); // standard deviation
 	return stdev;
 	};
 
@@ -212,7 +214,7 @@ void NKspacevals_sine_normal(vector<double>& input_vec,int k_val){//call by refe
 	vector<double>::iterator pert_normd;
 	pert_normd = max_element(normd_scores.begin(), normd_scores.end());
 	double pert_normd_score=normd_scores[int(distance(normd_scores.begin(), pert_normd))];
-	//#pragma omp simd
+	
 	for (uint i = 0; i < input_vec.size(); ++i)
 	{
 		normd_scores[i]=normd_scores[i]/pert_normd_score;
@@ -264,7 +266,7 @@ if (!file.is_open())
 	strings.close();
 }
 
-int loop=1000;
+int loop=10000;
 //creating and saving scores j<# is the number of spaces to create
 std::vector<int> k_opts={1,3,5,10};
 int start = 0;
@@ -274,15 +276,13 @@ int start = 0;
 		for (int k = 0; k < k_opts.size(); ++k)
 		{
 			NKspacevals_sine_normal(v,k_opts[k]);
+
 			//NKspacevals_gen(v,nk);
 			//if(k_opts[k]<10) NKspacevals_lowk(v,k_opts[k]);
 			//if(k_opts[k]==10) NKspacevals_highk(v,k_opts[k]);
 			
 			//NKspacevals_unit(v,nk);
-	//double sum = std::accumulate(v.begin(), v.end(), 0.0);
-	//double mean=sum / v.size();
-	//cout<<mean<<endl;
-	
+		
 	
 	//saving NKscores to unique files using fstream instead of ofstream due to writing speeds being faster with std::ios_base::out creating 1000 now takes approx 470 seconds 
 			std::fstream scores;
