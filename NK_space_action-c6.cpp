@@ -218,41 +218,45 @@ void output_matrix_connections(int NKspace,vector<Agent> Agents,int rounds)
            }
         }
     }
-void output_connections(int NKspace,vector<Agent> Agents,int rounds,int k,char method, int typeout , int Criterion,char vec_method,std::filesystem::path path){ //outputs all agents connections in csv format saved as txt file; includes minority status
+void output_connections(int NKspace,vector<Agent> Agents,int rounds,int k,char method, int typeout , int Criterion,char vec_method,std::filesystem::path path,int global,char special){ //outputs all agents connections in csv format saved as txt file; includes minority status
     string outtype="";
-    string outmethod="connections";
+    string outmethod="asymmetric";
     string submethod="";
-    if(method=='c') outmethod="connections";
-    if(method=='m') outmethod="matrix";
+    string globalstring="";
+    if(method=='c') outmethod="asymmetric";
+    if(method=='m') outmethod="symmetric";
     if(method=='s') outmethod="info_swap";
     if(method=='b') outmethod="basline";
-    if(method=='z') {outmethod="morph";}
-    if(outmethod=="connections")
+    if(special=='W') {outmethod="weighted";}
+    if(special=='B') {outmethod="bitflip";}
+    if(outmethod=="asymmetric")
         {
             if(Criterion==4)submethod="-4";
             if(Criterion==5)submethod="-5";
             if(Criterion==6)submethod="-6";
         }
-    
     if(typeout==-9)  outtype ="baseline";
+    if(outtype=="baseline") outtype.append("-"+to_string(Criterion));
     if(typeout==-1)  outtype="minority";
     if(typeout==1)  outtype ="majority";
     if(typeout==0)  outtype ="Swap";
     if(typeout==100) outtype="morph_exp";
     if(typeout==-100) outtype="morph_raw";
-    if(vec_method=='M') outtype+="_merit";
-    //cout<<path<<endl;
-    std::filesystem::create_directory(path/"edge-connections");
+    if(vec_method=='M') outtype+="merit";
+    if(global==1) globalstring="-global";
+    else globalstring="-local";
+    string edges="edge-list";
+    edges=edges.append(globalstring);
+    std::filesystem::create_directory(path/edges);
 
-    std::fstream out(path.string()+"/edge-connections/Network_"+outmethod+submethod+"_"+to_string(k)+"_"+to_string(NKspace)+"_"+to_string(rounds)+"_"+outtype+".txt",std::ios::out | std::ios::binary);
-    out<<"Agent id #"<<","<<"species"<<","<<"connection 0"<<","<<"connection 1"<<","<<"connection 2"<<","<<"connection 3"<<","<<"connection 4"<<","<<"connection 5"<<","<<"minority status"<<"\n";
+    std::fstream out(path.string()+"/"+edges+"/Network_"+outmethod+submethod+"_"+outtype+".txt",std::ios::binary|std::ios::out|std::ios::app);
+    //out<<"Round#: "<<rounds<<"\n";
+    out.seekg(0, std::ios::end);
+    if (out.tellg() == 0) out<<"Agent id #"<<","<<"species"<<","<<"connection 0"<<","<<"connection 1"<<","<<"connection 2"<<","<<"connection 3"<<","<<"connection 4"<<","<<"connection 5"<<","<<"NK#"<<","<<"K#"<<","<<"Round#"<<"\n";
     for (vector<Agent>::iterator i = Agents.begin(); i != Agents.end(); i++)
     {
-        out<<i->id<<","<<i->species<<","<<i->connections[0]<<","<<i->connections[1]<<","<<i->connections[2]<<","<<i->connections[3]<<","<<i->connections[4]<<","<<i->connections[5];
-        if(i->minority==1) 
-            {out<<","<<"M"<<"\n";} 
-        else
-            {out<<"\n";}
+        out<<i->id<<","<<i->species<<","<<i->connections[0]<<","<<i->connections[1]<<","<<i->connections[2]<<","<<i->connections[3]<<","<<i->connections[4]<<","<<i->connections[5]<<","<<NKspace<<","<<k<<","<<rounds<<endl;
+    	out.flush();
     }
 }
 
@@ -266,16 +270,18 @@ void output_scores(int NKspace,vector<Agent> Agents,int rounds){ //outputs all a
     }
 }
 
-void output_round(int NKspace,int round,vector<int> rounds,vector<double> scr,vector<double> ag,vector<double> mc,vector<int> us,vector<double> pu,int search,int typeout,vector<double> same,vector<double> diff,char method,int k_val,int Criterion,char vec_method,std::filesystem::path path){
+void output_round(int NKspace,int round,vector<int> rounds,vector<double> scr,vector<double> ag,vector<double> mc,vector<int> us,vector<double> pu,int search,int typeout,vector<double> same,vector<double> diff,char method,int k_val,int Criterion,char vec_method,std::filesystem::path path,int global, char special){
     string outtype="";
-    string outmethod="connections";
+    string outmethod="asymmetric";
     string submethod="";
-    if(method=='c') outmethod="connections";
-    if(method=='m') outmethod="matrix";
+    string globalstring="";
+    if(method=='c') outmethod="asymmetric";
+    if(method=='m') outmethod="symmetric";
     if(method=='s') outmethod="info_swap";
     if(method=='b') outmethod="basline";
-    if(method=='z') {outmethod="morph";}
-    if(outmethod=="connections")
+    if(special=='W') {outmethod="weighted";}
+    if(special=='B') {outmethod="bitflip";}
+    if(outmethod=="asymmetric")
         {
             if(Criterion==4)submethod="-4";
             if(Criterion==5)submethod="-5";
@@ -283,15 +289,17 @@ void output_round(int NKspace,int round,vector<int> rounds,vector<double> scr,ve
         }
     
     if(typeout==-9)  outtype ="baseline";
+    if(outtype=="baseline") outtype.append("-"+to_string(Criterion));
     if(typeout==-1)  outtype="minority";
     if(typeout==1)  outtype ="majority";
     if(typeout==0)  outtype ="Swap";
     if(typeout==100) outtype="morph_exp";
     if(typeout==-100) outtype="morph_raw";
-    if(vec_method=='M') outtype+="_merit";
+    if(vec_method=='M') outtype+="merit";
     //cout<<outmethod<<endl;
-    
-    std::fstream out(path.string()+"/6c-NK_space_"+to_string(k_val)+'_'+to_string(NKspace)+"_"+outtype+"_SH_"+to_string(search)+"_"+outmethod+submethod+".txt",std::ios::out | std::ios::binary);
+    if(global==1) globalstring="-global";
+    else globalstring="-local";
+    std::fstream out(path.string()+"/6c-NK_space_"+to_string(k_val)+'_'+to_string(NKspace)+"_"+outtype+"_SH_"+to_string(search)+"_"+outmethod+submethod+globalstring+".txt",std::ios::out | std::ios::binary);
     out<<"round,"<<"max score,"<<"avg score,"<<"Number of unique solutions,"<<"percent with max score,"<<"avg similiar species,"<<"avg different species,"<<"minority count"<<"\n";
     for (int i=0;i<=round; i++){
         out<<std::setprecision(15)<<rounds[i]<<","<<scr[i]<<","<<ag[i]<<","<<us[i]<<","<<pu[i]<<","<<same[i]<<","<<diff[i]<<","<<mc[i]<<"\n";
@@ -350,28 +358,29 @@ std::ios::sync_with_stdio(false);
     char method='q';
     int score_vec=0;
     int globaltest=-1;
-    while((opt = getopt(argc, argv, "s:e:S:c:m:C:M:P:G:")) != -1)  
+    char special='N';
+    while((opt = getopt(argc, argv, "s:e:S:c:m:C:M:P:G:U:")) != -1)  
         {  
             switch(opt)  
             {  
-            case 's': start=atoi(optarg); break;
-            case 'e':  end=atoi(optarg); break;
+            case 's': start=atoi(optarg); break; // start index of nk spaces
+            case 'e':  end=atoi(optarg); break; // end index of nk spaces
             case 'S':  
-                searchm=atoi(optarg); 
+                searchm=atoi(optarg); // no long in use
                 break;     
             case 'c':  
-                condition=atoi(optarg); 
+                condition=atoi(optarg); // sets majority/minority,merit seeking
                 break;  
             case 'm':
-                mode=atoi(optarg);
+                mode=atoi(optarg); // symmetric/asymmetric
                 break;
             case 'C':  
-                Criterion=atoi(optarg); 
+                Criterion=atoi(optarg); // number for minority status 
                 break;  
-            case 'M': method=*optarg; break;
+            case 'M': method=*optarg; break; 
             case 'P': prob=atof(optarg); break;
-            case 'V': if(atoi(optarg)==1) score_vec=atoi(optarg); break;
-            case 'G': if(atoi(optarg)==1) globaltest=1;; break;
+            case 'G': if(atoi(optarg)==1) globaltest=1;; break; // local or global seeking
+            case 'U': special=*optarg; break;
         }  
     }
     if(score_vec==1 && mode==1){
@@ -412,11 +421,12 @@ std::ios::sync_with_stdio(false);
     }
     else{
         cout<<"Morhping will not be used\n";
+        cout<<condition;
         if(abs(condition)!=1){
             if(condition==-9){
                 cout<<"using baseline\n";
             }
-            if(condition==9){
+            else if(condition==9){
              score_vec=1;
              cout<<"using merit based connection swapping\n";
          	}
@@ -502,9 +512,10 @@ std::ios::sync_with_stdio(false);
     int rounds = 0;
     int nums = 0;
     double mcount=0;
-    vector<int> k_opts={1,3,5,10};
-#pragma omp parallel for default(none) shared(end,searchm,::na,NKspacevals,NKspace_num,cout,prob,argc,condition,mode,method,::matrixa,k_opts,std::cin,::agentcounta,Criterion,score_vec,globaltest) firstprivate(max,avgscore,percuni,maxscore,maxround,minoritycount,avgscores,uniquesize,percentuni,NKspacescore,rounds,mcount,agent_array,type,nums,elts,same,diff) schedule(static,end/4)
+    vector<int> k_opts={5};
+#pragma omp parallel for default(none) shared(end,searchm,::na,NKspacevals,NKspace_num,cout,prob,argc,condition,mode,method,::matrixa,k_opts,std::cin,::agentcounta,Criterion,score_vec,globaltest,special) firstprivate(max,avgscore,percuni,maxscore,maxround,minoritycount,avgscores,uniquesize,percentuni,NKspacescore,rounds,mcount,agent_array,type,nums,elts,same,diff) schedule(static,end/4)
     for(int inksp=NKspace_num;inksp<end;++inksp){
+        
         for (int opts = 0; opts < k_opts.size(); ++opts)
         {
         char merit_method='0';
@@ -512,17 +523,29 @@ std::ios::sync_with_stdio(false);
         string outtype="";
         string outmethod="";
         string submethod="";
-        if(mode==-1) outmethod="connections";
-        if(mode==1) outmethod="matrix";
-        if(outmethod=="connections")
+        string globalstring="";
+        if(mode==-1) outmethod="asymmetric";
+        if(mode==1) outmethod="symmetric";
+        if(outmethod=="asymmetric")
         {
             if(Criterion==4)submethod="-4";
             if(Criterion==5)submethod="-5";
             if(Criterion==6)submethod="-6";
         }
-        if(merit_method=='M') outmethod+="_merit";   
+        if(outmethod=="symmetric")
+        {
+            if(Criterion==4)submethod="-4";
+            if(Criterion==5)submethod="-5";
+            if(Criterion==6)submethod="-6";
+        }
+        if(merit_method=='M') outmethod+="_merit";
+        if(globaltest==1) globalstring="-global";
+        else globalstring="-local";
+        if(condition==-9) outmethod="baseline";
+        if(special=='W')outmethod+=("_weighted_"+to_string(prob));
+        if(special=='B')outmethod+=("_bitflip"+to_string(prob));   
         std::filesystem::path path=std::filesystem::current_path();
-        path/=outmethod+submethod;
+        path/=outmethod+submethod+globalstring;
         //cout<<path<<endl;
         if(!std::filesystem::exists(path)) std::filesystem::create_directory(path);
         //srand(inksp+1);
@@ -593,6 +616,7 @@ std::ios::sync_with_stdio(false);
         ids.reset();
         if(nums==(::agentcounta)) break;
     }
+    
     //cout<<"here\n";
     //agent_connections_replacement_number(agent_array,inksp);
     //cout<<" after\n";
@@ -602,7 +626,7 @@ std::ios::sync_with_stdio(false);
 
 
     }*/
-    
+        
     for (; rounds < 100; ++rounds) {
         elts.clear();
         elts.resize(::agentcounta);
@@ -687,8 +711,17 @@ std::ios::sync_with_stdio(false);
        
         for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); ++i)
         {
-            i->Agent::agent_exploit(*i, agent_array[i->connections[0]], agent_array[i->connections[1]],
+            if(special=='N')
+                {
+                    i->Agent::agent_exploit(*i, agent_array[i->connections[0]], agent_array[i->connections[1]],
                             agent_array[i->connections[2]], agent_array[i->connections[3]], agent_array[i->connections[4]],agent_array[i->connections[5]],prob,method,mode,Criterion);
+                }
+            if (special=='W')
+                {
+                    i->Agent::agent_exploit_weighted_inverse(*i, agent_array[i->connections[0]], agent_array[i->connections[1]],
+                            agent_array[i->connections[2]], agent_array[i->connections[3]], agent_array[i->connections[4]],agent_array[i->connections[5]],mode,Criterion,prob);
+                }    
+            
             //cout<<i->id<<" \033[1;31mid\033[0m "<<i->species<<" \033[1;32mspecies\033[0m "<<" "<<i->mutate_flag<< "\n";
             //cout<<i->minority<<" minority"<<" \033[1;34mnew_string\033[0m "<<endl;
             
@@ -713,6 +746,7 @@ std::ios::sync_with_stdio(false);
                 //cout<<i->binarystring<<" \033[1;34mnew_string\033[0m "<<i->tempstring<<" \033[1;33mold_string\033[0m "<<"\n";
             }
         }
+        
         if(condition==-9 && method!='z')
         {
             method='b';
@@ -739,7 +773,7 @@ std::ios::sync_with_stdio(false);
                         if (i->minority == 1) 
                        {//major seeking
                            //cout<<i->id<<" id \n";
-                      
+                      	
                            if(mode==1)
                             {//matrix
                                 method='m';
@@ -752,12 +786,16 @@ std::ios::sync_with_stdio(false);
                               {
 
                               	 i->Agent::agent_swap_hack_asymmetric_global(i->id,agent_array,*i,Criterion);
-                              	 continue;
+                              	 //continue;
                               }  
+                              if(globaltest!=1)
+                              	{ 
+
                                 method='c';
                                i->Agent::agent_swap_hack_asymmetric(i->id,agent_array,*i,
                                                agent_array[i->connections[0]], agent_array[i->connections[1]],
                             agent_array[i->connections[2]], agent_array[i->connections[3]], agent_array[i->connections[4]],agent_array[i->connections[5]],Criterion,list);
+                           		}
                            }
                         }
                     }
@@ -765,11 +803,10 @@ std::ios::sync_with_stdio(false);
                    {
                         vector<int> list;
                         list=(i->Agent::agent_connections_species_match(agent_array,*i,agent_array[i->connections[0]], agent_array[i->connections[1]],agent_array[i->connections[2]], agent_array[i->connections[3]], agent_array[i->connections[4]],agent_array[i->connections[5]],condition));
-                        
+
                         if (i->minority != 1) 
                        {//minority seeking
                            //cout<<i->id<<" id \n";
-                      
                            if(mode==1)
                             {
                                 
@@ -781,14 +818,16 @@ std::ios::sync_with_stdio(false);
                             {
                              if(globaltest==1)
                               {
-
                               	 i->Agent::agent_swap_hack_asymmetric_global(i->id,agent_array,*i,Criterion);
-                              	 continue;
+                              	 //continue;
                               }
+                              if(globaltest!=1)
+                              {
                                 method='c';
                                i->Agent::agent_swap_hack_asymmetric(i->id,agent_array,*i,
                                                agent_array[i->connections[0]], agent_array[i->connections[1]],
                             agent_array[i->connections[2]], agent_array[i->connections[3]], agent_array[i->connections[4]],agent_array[i->connections[5]],Criterion,list);
+                           		}
                            }
                         }
                     }
@@ -805,11 +844,17 @@ std::ios::sync_with_stdio(false);
                            }
                             if(mode==-1)
                             {
-                            
+                            	if(globaltest==1)
+                              	{
+                              	 	i->Agent::agent_swap_hack_asymmetric_global(i->id,agent_array,*i,Criterion);
+                              		 //continue;
+                              	}
+                              	if(globaltest!=1){
                                 method='c';
                                i->Agent::agent_swap_hack_asymmetric(i->id,agent_array,*i,
                                                agent_array[i->connections[0]], agent_array[i->connections[1]],
                             agent_array[i->connections[2]], agent_array[i->connections[3]], agent_array[i->connections[4]],agent_array[i->connections[5]],Criterion,list);
+                           		}
                            }
                     }
                 }
@@ -901,7 +946,7 @@ std::ios::sync_with_stdio(false);
      *
      *
      */
-
+        output_connections(inksp,agent_array,rounds,k_opts[opts],method,condition,Criterion,merit_method,path,globaltest,special);
         //output_matrix_connections(inksp,agent_array,rounds);
         //output_connections(inksp,agent_array,rounds);
         if((uniquesize[rounds]==1) || rounds>=70)
@@ -916,9 +961,9 @@ std::ios::sync_with_stdio(false);
     //for (int i = 0; i < rounds; i++) {
         //cout << maxscore[i] << " \033[1;31mmax score for round\033[0m " << i << endl;
         //cout << avgscores[i] << " \033[1;32mavg score for round\033[0m " << i << "\n";
-
-    //output_connections(inksp,agent_array,rounds,k_opts[opts],method,condition,Criterion,merit_method,path);
-    output_round(inksp,rounds,maxround,maxscore,avgscores,minoritycount,uniquesize,percentuni,searchm,condition,same,diff,method,k_opts[opts],Criterion,merit_method,path);
+    
+    
+    output_round(inksp,rounds,maxround,maxscore,avgscores,minoritycount,uniquesize,percentuni,searchm,condition,same,diff,method,k_opts[opts],Criterion,merit_method,path,globaltest,special);
     	}
     }
     return 0;
