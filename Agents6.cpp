@@ -426,7 +426,7 @@ int matrix[agentcounta][agentcounta]={};
         if (input_agent.flag == -1) {
             //keeps running until flag is not -1
             string temstring = input_agent.binarystring;
-            for(int i=0;i<1;i++){
+            for(int i=0;i<7;i++){
                 if (temstring[i] == '1')
                 {
                     temstring[i] = '0';
@@ -453,7 +453,7 @@ int matrix[agentcounta][agentcounta]={};
         if (input_agent.flag == -1) {
             //keeps running until flag is not -1
             string temstring = input_agent.binarystring;
-            for(int i=7;i<8;i++){
+            for(int i=7;i<15;i++){
             
                 if (temstring[i] == '1')
                 {
@@ -1144,7 +1144,7 @@ int matrix[agentcounta][agentcounta]={};
         if (input_agent.flag == 0) input_agent.flag = -1;
     }
 
-    void Agent::agent_exploit_weighted_inverse(Agent &input_agent, Agent a, Agent b, Agent c, Agent d,Agent e, Agent f,int mode,int Criterion) {
+    void Agent::agent_exploit_weighted_inverse(Agent &input_agent, Agent a, Agent b, Agent c, Agent d,Agent e, Agent f,int mode,int Criterion, double prob) {
         //checks connections and assigns new score to main agent if needed otherwise sets flag to -1
         // also checks if it is in the minority and sets the minority flag to 1
         // will mutate agents string and score if they exploit
@@ -1176,19 +1176,13 @@ int matrix[agentcounta][agentcounta]={};
         //cout<<"minority status "<<input_agent.minority<<endl;
         //score update
         int target_id=-1;
-        double multiplier=0.25;
-        if(input_agent.species!=a.species) ascore=a.score-a.score*multiplier;
-        else ascore=a.score+a.score*multiplier;
-        if(input_agent.species!=b.species) bscore=b.score-b.score*multiplier;
-        else bscore=b.score+b.score*multiplier;
-        if(input_agent.species!=c.species) cscore=c.score-c.score*multiplier;
-        else cscore=c.score+c.score*multiplier;
-        if(input_agent.species!=d.species) dscore=d.score-d.score*multiplier;
-        else dscore=d.score+d.score*multiplier;
-        if(input_agent.species!=e.species) escore=e.score-e.score*multiplier;
-        else escore=e.score+e.score*multiplier;
-        if(input_agent.species!=f.species) fscore=f.score-f.score*multiplier;
-        else fscore=f.score+f.score*multiplier;
+        double multiplier=(1-prob);
+        ascore=a.score*multiplier;
+        bscore=b.score*multiplier;
+        cscore=c.score*multiplier;
+        dscore=d.score*multiplier;
+        escore=e.score*multiplier;
+        fscore=f.score*multiplier;
 
         if (temscore < ascore) 
         {
@@ -1265,15 +1259,17 @@ void Agent::agent_asymmetric_swap_global(int num,vector<Agent> &Agents,Agent &in
         vector<int> C_potential;
         std::vector<int>::iterator loc = std::find(old_cons.begin(), old_cons.end(), loop);
         int index = std::distance(old_cons.begin(), loc);
-        std::uniform_int_distribution<> global(0,agentcounta); //random selection of C* from C_potential.
+        std::uniform_int_distribution<> global(0,::agentcounta-1); //random selection of C* from C_potential.
         std::random_device globalrdm;
         std::mt19937 genGlobal(globalrdm());
         int B=old_cons[loop];
-
             //cout<<input_agent.id<<endl;
-            for(unsigned int i=0;i<Criterion;i++){ //find and only adds agents for C* from the pool that are not connected to A
-                int choice=global(genGlobal);
+            int choice=global(genGlobal);
+            //int choice=rand()%50;
+            for(unsigned int i=0;i<6;i++){ //find and only adds agents for C* from the pool that are not connected to A
+                
                 while( choice==A) choice=global(genGlobal);
+                //while( choice==A) choice=rand()%50;
                 global.reset();
                 bool found = false;
                 for (auto & elem : Agents[choice].connections)
@@ -1288,7 +1284,6 @@ void Agent::agent_asymmetric_swap_global(int num,vector<Agent> &Agents,Agent &in
                         C_potential.push_back(choice);
                     }
             }
-
             if(C_potential.size()==0){
                 C_potential.push_back(B);
             }
@@ -1297,7 +1292,7 @@ void Agent::agent_asymmetric_swap_global(int num,vector<Agent> &Agents,Agent &in
             std::random_device Crdm;
             std::mt19937 genC(Crdm());
             int C=C_potential[c_sel(genC)];
-            for (int i = 0; i <6; ++i)
+            for (int i = 0; i <C_potential.size(); ++i)
             {
             	bool found = false;
                 for (auto & elem : input_agent.connections)
@@ -1317,7 +1312,6 @@ void Agent::agent_asymmetric_swap_global(int num,vector<Agent> &Agents,Agent &in
                     }
 
             }
-
         	c_sel.reset();
             /*cout<<"\n before\n";
             cout<<Agents[A].id<<endl;
@@ -1325,17 +1319,18 @@ void Agent::agent_asymmetric_swap_global(int num,vector<Agent> &Agents,Agent &in
             {
                 cout<<Agents[A].connections[i]<<" ";
             }*/
+            
 			std::vector<int>::iterator ABit = std::find(Agents[A].connections.begin(), Agents[A].connections.end(), B);
             int ABindex = std::distance(Agents[A].connections.begin(), ABit);
             Agents[A].connections[ABindex]=C;            
             std::sort(input_agent.connections.begin(),input_agent.connections.end());
-
         /*cout<<"\n after\n";
                 for (int i = 0; i < 6; ++i)
         {
             cout<<Agents[A].connections[i]<<" ";
         }*/
         input_agent.minority=0;
+        
 	}
 
 
@@ -1346,5 +1341,96 @@ void Agent::agent_swap_hack_asymmetric_global(int num,vector<Agent> &Agents,Agen
             //cout<<"func asy\n";
             //cout<<agent_list[i]<<endl;
             agent_asymmetric_swap_global(num,Agents, input_agent,i,Criterion);
+        }
+    }
+
+
+    void Agent::agent_asymmetric_swap_global_metric(int num,vector<Agent> &Agents,Agent &input_agent,int loop,int Criterion){
+        int A=input_agent.id; //input agent named A 
+        vector<int> old_cons=input_agent.connections;
+        vector<int> C_potential;
+        std::vector<int>::iterator loc = std::find(old_cons.begin(), old_cons.end(), loop);
+        int index = std::distance(old_cons.begin(), loc);
+        std::uniform_int_distribution<> global(0,::agentcounta-1); //random selection of C* from C_potential.
+        std::random_device globalrdm;
+        std::mt19937 genGlobal(globalrdm());
+        int B=old_cons[loop];
+            //cout<<input_agent.id<<endl;
+            int choice=global(genGlobal);
+            //int choice=rand()%50;
+            for(unsigned int i=0;i<Criterion;i++){ //find and only adds agents for C* from the pool that are not connected to A
+                while( choice==A) choice=global(genGlobal);
+                //while( choice==A) choice=rand()%50;
+                global.reset();
+                bool found = false;
+                for (auto & elem : Agents[choice].connections)
+                    if (elem == A)
+                    {
+                        found = true;
+                        break;
+                    }
+                if(found==true){continue;}
+                if(found==false)
+                    {
+                        C_potential.push_back(choice);
+                    }
+            }
+            if(C_potential.size()==0){
+                C_potential.push_back(B);
+            }
+            
+            std::uniform_int_distribution<> c_sel(0,C_potential.size()-1); //random selection of C* from C_potential.
+            std::random_device Crdm;
+            std::mt19937 genC(Crdm());
+            int C=C_potential[c_sel(genC)];
+            for (int i = 0; i <C_potential.size(); ++i)
+            {
+            	bool found = false;
+                for (auto & elem : input_agent.connections)
+                    if (elem == C)
+                    {
+                        found = true;
+                        C=global(genGlobal);
+                        int count=0;
+                        while(elem==C){
+                          C=C_potential[c_sel(genC)];
+                          ++count;
+                          if(count==6){
+                           C=global(genGlobal);
+                           break;
+                       		}
+                      	}
+                    }
+
+            }
+        	c_sel.reset();
+            /*cout<<"\n before\n";
+            cout<<Agents[A].id<<endl;
+            for (int i = 0; i < 6; ++i)
+            {
+                cout<<Agents[A].connections[i]<<" ";
+            }*/
+            
+			std::vector<int>::iterator ABit = std::find(Agents[A].connections.begin(), Agents[A].connections.end(), B);
+            int ABindex = std::distance(Agents[A].connections.begin(), ABit);
+            Agents[A].connections[ABindex]=C;            
+            std::sort(input_agent.connections.begin(),input_agent.connections.end());
+        /*cout<<"\n after\n";
+                for (int i = 0; i < 6; ++i)
+        {
+            cout<<Agents[A].connections[i]<<" ";
+        }*/
+        input_agent.minority=0;
+        
+	}
+
+
+void Agent::agent_swap_hack_asymmetric_global_metric(int num,vector<Agent> &Agents,Agent &input_agent, int Criterion,vector<int> list){ //used for the connection method to loop through connection_replace and replace connections
+        for (int i=0;i<Criterion; ++i)
+        {
+            //if(agent_list[i]==-1||agent_list.size()==0)break;
+            //cout<<"func asy\n";
+            //cout<<agent_list[i]<<endl;
+            agent_asymmetric_swap_global_metric(num,Agents, input_agent,i,Criterion);
         }
     }

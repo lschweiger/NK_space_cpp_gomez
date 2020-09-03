@@ -53,11 +53,13 @@ void matrix_fill_after(int id,vector<int> filler);//debugging
 void matrix_print(vector<Agent> agent_array);//debugging
 void swap_species(Agent &input_agent,double& epsilon);
 void agent_exploit_weighted(Agent &input_agent, Agent a, Agent b, Agent c, Agent d, Agent e, Agent f,int mode,int Criterion);
-void agent_exploit_weighted_inverse(Agent &input_agent, Agent a, Agent b, Agent c, Agent d, Agent e, Agent f,int mode,int Criterion);
+void agent_exploit_weighted_inverse(Agent &input_agent, Agent a, Agent b, Agent c, Agent d, Agent e, Agent f,int mode,int Criterion,double prob);
 //below are testing functions
 
 void agent_asymmetric_swap_global(int num,vector<Agent> &Agents,Agent &input_agent,int loop,int Criterion);//connections method swap, getting agents globally
 void agent_swap_hack_asymmetric_global(int num,vector<Agent> &Agents,Agent &input_agent, int Criterion);
+void agent_asymmetric_swap_global_metric(int num,vector<Agent> &Agents,Agent &input_agent,int loop,int Criterion);
+void agent_swap_hack_asymmetric_global_metric(int num,vector<Agent> &Agents,Agent &input_agent, int Criterion,vector<int> list);
 
 };
 
