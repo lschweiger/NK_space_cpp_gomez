@@ -64,5 +64,11 @@ From the remaining **V<sub>3<sub>j</sub></sub>** a randomly selected **V<sub>3</
 **Agent swap Asymmetric**:<br />
 Similar to Symmetric, but the only requirement is that Agents maintain 6 connection.  Agents do not have the requirement that the connection be bidirectional.Meaning when agent **V<sub>1</sub>** loses a connection to **V<sub>2</sub>** and connects to **V<sub>3</sub>**, **V<sub>1</sub>**&#8594;**V<sub>2</sub>** to **V<sub>1</sub>**&#8594;**V<sub>3</sub>**. However the connection  **V<sub>2</sub>**&#8594;**V<sub>1</sub>** is still present in **V<sub>2</sub>**'s list of connection, and **V<sub>3</sub>** is not aware that **V<sub>1</sub>** is connected to **V<sub>3</sub>**. Furthermore **V<sub>4</sub>** has no role in Asymmetric.
 
-**Agent search heuristics**
-When agents capable of 
+**Agent search heuristics**<br/>
+When agents cannot exploit, they will move on to explore.
+There are 4 search heuristics that can be performed that are randomly assigned for all agents once per round. 
+- agent_explore_random_0: a bit randomly chosen in the string will be flipped to a Zero
+- agent_explore_random_1: a bit randomly chosen in the string will be flipped to a One
+- agent_explore_flip: a bit randomly chosen in the string will be flipped from what is was to the other 0 to 1 or 1 to 0.
+- agent_explore_shuffle: the string will be partitioned into two parts first half and second half,
+and two numbers will be chosen from from each half. the agent then permute the string in between the chosen numbers. i.e if 3 and 8 are chosen all bits in the string from 3 to 8 and only that range will have the bit value shuffle. 
