@@ -34,7 +34,7 @@ and Run the simulation with
 A list of 2^15 of randomly generated numbers between 0 and 1, is created up to 10000 times, each file is given an ID that is the NK space ID number. The NK spaces also may have a complexity value $K$ that changes the values. There are currently 4 values for K: 1,3,5,10.<br />
 
 **AB random list**:<br />
-For every NK space, a random generated vector(list) of A's and B's is used to fill all agents species variable. To start a vector of size 50, is filled with either $A$ or $B$ chosen at random by a bernoulli distribution with success equal to 0.5, where 1 is $A$ and 0 is $B$. A seed is used to file the vector, the seed is based on  the NK space ID number plus 1 i.e NK spaces 10 will be seeded using the number 11. This allows the different complexity values to be used and still have the same assignment of A, B for each Nk spaces with the same ID.<br />
+For every NK space, a random generated vector(list) of A's and B's is used to fill all agents species variable. To start a vector of size 50, is filled with either **A** or **B** chosen at random by a bernoulli distribution with success equal to 0.5, where 1 is **A** and 0 is **B**. A seed is used to file the vector, the seed is based on  the NK space ID number plus 1 i.e NK spaces 10 will be seeded using the number 11. This allows the different complexity values to be used and still have the same assignment of A, B for each Nk spaces with the same ID.<br />
 
 **Agent minority status**:<br /> 
 The value of -m will invoke either agent_minority_status_asymmetric agent_minority_status_symmetric, Both of which will count and set an internal flag(0 or 1) that indicates whether the agent is in the Minority where 0 is no, and 1 is yes. 
