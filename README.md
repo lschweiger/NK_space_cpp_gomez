@@ -62,4 +62,7 @@ From the remaining **V<sub>3<sub>j</sub></sub>** a randomly selected **V<sub>3</
 ![Alt text](images/algo_end.jpg?raw=true "After Tie swapping")
 
 **Agent swap Asymmetric**:<br />
-Similar to Symmetric, but the only requirement is that Agents maintain 6 connection.  Agents to not have the requirement that the connection be bidirectional.Meaning when agent **V<sub>1</sub>** loses a connection to **V<sub>2</sub>** and connects to **V<sub>3</sub>**, **V<sub>1</sub>**&#8594;**V<sub>2</sub>** to **V<sub>1</sub>**&#8594;**V<sub>3</sub>**. The connection  **V<sub>2</sub>**&#8594;**V<sub>1</sub>** is still present in **V<sub>2</sub>**'s list of connection, and **V<sub>3</sub>** is not aware that **V<sub>1</sub>** is connected to **V<sub>3</sub>**. Furthermore **V<sub>4</sub>** has no role in Asymmetric.
+Similar to Symmetric, but the only requirement is that Agents maintain 6 connection.  Agents do not have the requirement that the connection be bidirectional.Meaning when agent **V<sub>1</sub>** loses a connection to **V<sub>2</sub>** and connects to **V<sub>3</sub>**, **V<sub>1</sub>**&#8594;**V<sub>2</sub>** to **V<sub>1</sub>**&#8594;**V<sub>3</sub>**. However the connection  **V<sub>2</sub>**&#8594;**V<sub>1</sub>** is still present in **V<sub>2</sub>**'s list of connection, and **V<sub>3</sub>** is not aware that **V<sub>1</sub>** is connected to **V<sub>3</sub>**. Furthermore **V<sub>4</sub>** has no role in Asymmetric.
+
+**Agent search heuristics**
+When agents capable of 
