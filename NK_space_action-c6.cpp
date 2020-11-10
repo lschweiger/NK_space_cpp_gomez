@@ -214,7 +214,7 @@ void output_matrix_connections(int NKspace,vector<Agent> Agents,int rounds)
                   
               }
               out<<",";
-              if(j==99)out<<"\n";
+              if(j==agentcounta)out<<"\n";
            }
         }
     }
@@ -409,7 +409,7 @@ std::ios::sync_with_stdio(false);
         cout<<"Valid Criterion values are 4,5,6 using default value of 4\n";
         Criterion=4;
     	}
-    	else Criterion=3;
+    	else Criterion=4;
     }
     if(method=='z'){
         cout<<"Morhping will be used\nIf not desired, pass -M q\n";
@@ -512,7 +512,8 @@ std::ios::sync_with_stdio(false);
     int rounds = 0;
     int nums = 0;
     double mcount=0;
-    vector<int> k_opts={5};
+    vector<int> k_opts={1,3,5,10};
+    //vector<int> k_opts={5};
 #pragma omp parallel for default(none) shared(end,searchm,::na,NKspacevals,NKspace_num,cout,prob,argc,condition,mode,method,::matrixa,k_opts,std::cin,::agentcounta,Criterion,score_vec,globaltest,special) firstprivate(max,avgscore,percuni,maxscore,maxround,minoritycount,avgscores,uniquesize,percentuni,NKspacescore,rounds,mcount,agent_array,type,nums,elts,same,diff) schedule(static,end/4)
     for(int inksp=NKspace_num;inksp<end;++inksp){
         
@@ -549,10 +550,27 @@ std::ios::sync_with_stdio(false);
         //cout<<path<<endl;
         if(!std::filesystem::exists(path)) std::filesystem::create_directory(path);
         //srand(inksp+1);
-        cout<<"NK_space #:"<<inksp<<endl;
+        //cout<<"NK_space #:"<<inksp<<endl;
         #ifdef _OPENMP
-        cout<<"\t thread #: "<<omp_get_thread_num()<<endl;
+        //cout<<"\t thread #: "<<omp_get_thread_num()<<"\n";
         #endif
+        std::random_device Asrdm;
+        std::mt19937 genAs(Asrdm());
+        std::uniform_int_distribution<> Asearch(0,3);
+        std::random_device Bsrdm;
+        std::mt19937 genBs(Bsrdm());
+        std::uniform_int_distribution<> Bsearch(0,3);
+        int A_sel= Asearch(genAs);
+        int B_sel= Bsearch(genBs);
+        while(B_sel==A_sel){
+            B_sel= Bsearch(genBs)
+            Bsearch.reset();
+        }
+        
+        Asearch.reset();
+        Bsearch.reset();
+
+        //cout<<"\n"<<A_sel<<" "<<B_sel<<"\n";
         if(inksp>0||opts>0)
         {
             agent_array.clear();
@@ -593,7 +611,7 @@ std::ios::sync_with_stdio(false);
         //AB_part_5_list(type);
     AB_random_list(type,inksp);
     //AB_list_permute(type,inksp);
-    cout<<k_opts[opts]<<" "<<inksp<<endl;
+    //cout<<k_opts[opts]<<" "<<inksp<<"\n";
     open_space_scores(inksp, NKspacescore,k_opts[opts]);
     //cout<<NKspacescore.size();
     for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); ++i) 
@@ -611,12 +629,11 @@ std::ios::sync_with_stdio(false);
         //cout<<i->id<<endl;
         //cout<<i->species<<endl;
         i->Agent::agent_change(rnums, *i, NKspacevals, NKspacescore);
-
+        i->connection_replace=Criterion;
         nums++;
         ids.reset();
         if(nums==(::agentcounta)) break;
     }
-    
     //cout<<"here\n";
     //agent_connections_replacement_number(agent_array,inksp);
     //cout<<" after\n";
@@ -674,26 +691,33 @@ std::ios::sync_with_stdio(false);
         mcount = 0;
         for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); ++i) 
         {
-            if(mode!=-1){
+            if(mode==1 && condition!=9){
                 //cout<<"mode 1\n";
                 i->Agent::agent_minority_status_symmetric(*i, agent_array[i->connections[0]], agent_array[i->connections[1]],
-                                agent_array[i->connections[2]], agent_array[i->connections[3]], agent_array[i->connections[4]],agent_array[i->connections[5]]);
+                                agent_array[i->connections[2]], agent_array[i->connections[3]], agent_array[i->connections[4]],agent_array[i->connections[5]],condition);
                 if (i->minority == 1) 
                     {
                         mcount++;
                     }
                 }
-            if(mode==-1){
+            if(mode==-1 && condition!=9){
                 //cout<<"mode -1\n";
                 i->Agent::agent_minority_status_asymmetric(*i, agent_array[i->connections[0]], agent_array[i->connections[1]],
+                                agent_array[i->connections[2]], agent_array[i->connections[3]], agent_array[i->connections[4]],agent_array[i->connections[5]],Criterion,condition);
+                if (i->minority == 1) 
+                    {
+                        mcount++;
+                    }
+                
+                }
+            if(condition==9){
+                i->Agent::agent_minority_status_merit(*i, agent_array[i->connections[0]], agent_array[i->connections[1]],
                                 agent_array[i->connections[2]], agent_array[i->connections[3]], agent_array[i->connections[4]],agent_array[i->connections[5]],Criterion);
                 if (i->minority == 1) 
                     {
                         mcount++;
                     }
-                
                 }
-                
             
         }
 
@@ -713,13 +737,19 @@ std::ios::sync_with_stdio(false);
         {
             if(special=='N')
                 {
+                    if(condition==9){
+                        i->Agent::agent_exploit(*i, agent_array[i->connections[0]], agent_array[i->connections[1]],
+                            agent_array[i->connections[2]], agent_array[i->connections[3]], agent_array[i->connections[4]],agent_array[i->connections[5]],prob,method,condition,Criterion,condition,NKspacescore);
+                    }
+                    if(condition!=9){
                     i->Agent::agent_exploit(*i, agent_array[i->connections[0]], agent_array[i->connections[1]],
-                            agent_array[i->connections[2]], agent_array[i->connections[3]], agent_array[i->connections[4]],agent_array[i->connections[5]],prob,method,mode,Criterion);
+                            agent_array[i->connections[2]], agent_array[i->connections[3]], agent_array[i->connections[4]],agent_array[i->connections[5]],prob,method,mode,Criterion,condition,NKspacescore);
+                    }
                 }
             if (special=='W')
                 {
                     i->Agent::agent_exploit_weighted_inverse(*i, agent_array[i->connections[0]], agent_array[i->connections[1]],
-                            agent_array[i->connections[2]], agent_array[i->connections[3]], agent_array[i->connections[4]],agent_array[i->connections[5]],mode,Criterion,prob);
+                            agent_array[i->connections[2]], agent_array[i->connections[3]], agent_array[i->connections[4]],agent_array[i->connections[5]],mode,Criterion,prob,condition);
                 }    
             
             //cout<<i->id<<" \033[1;31mid\033[0m "<<i->species<<" \033[1;32mspecies\033[0m "<<" "<<i->mutate_flag<< "\n";
@@ -734,8 +764,7 @@ std::ios::sync_with_stdio(false);
             //cout<<i->binarystring<<" \033[1;34mnew_string\033[0m "<<i->tempstring<<" \033[1;33mold_string\033[0m "<<"\n";
         }
 
-        int A_sel= rand()%4;
-        int B_sel= rand()%4;
+        
         for (vector<Agent>::iterator i = agent_array.begin(); i != agent_array.end(); ++i) 
         {
             if (i->flag == -1) 
@@ -772,7 +801,6 @@ std::ios::sync_with_stdio(false);
                         
                         if (i->minority == 1) 
                        {//major seeking
-                           //cout<<i->id<<" id \n";
                       	
                            if(mode==1)
                             {//matrix
@@ -782,6 +810,7 @@ std::ios::sync_with_stdio(false);
                            }
                             if(mode==-1)
                             {// connection reassignment
+
                             if(globaltest==1)
                               {
 
@@ -804,7 +833,7 @@ std::ios::sync_with_stdio(false);
                         vector<int> list;
                         list=(i->Agent::agent_connections_species_match(agent_array,*i,agent_array[i->connections[0]], agent_array[i->connections[1]],agent_array[i->connections[2]], agent_array[i->connections[3]], agent_array[i->connections[4]],agent_array[i->connections[5]],condition));
 
-                        if (i->minority != 1) 
+                        if (i->minority == 1) 
                        {//minority seeking
                            //cout<<i->id<<" id \n";
                            if(mode==1)
