@@ -21,11 +21,12 @@ public:
 
 void agent_connections(int num, Agent &input_agent);
 void agent_change(int num, Agent &input_agent, vector<string> &istring, vector<double> &val);
-void agent_minority_status_symmetric(Agent &input_agent, Agent a, Agent b, Agent c, Agent d, Agent e, Agent f);
-void agent_minority_status_asymmetric(Agent &input_agent, Agent a, Agent b, Agent c, Agent d,Agent e, Agent f, int Criterion);
+void agent_minority_status_symmetric(Agent &input_agent, Agent a, Agent b, Agent c, Agent d, Agent e, Agent f,int condition);
+void agent_minority_status_asymmetric(Agent &input_agent, Agent a, Agent b, Agent c, Agent d,Agent e, Agent f, int Criterion,int condition);
+void agent_minority_status_merit(Agent &input_agent, Agent a, Agent b, Agent c, Agent d,Agent e, Agent f, int Criterion);
 void morph_agent_exp(Agent &input,Agent target,double diffscore);
 void morph_agent_100(Agent &input,Agent target,double prob);
-void agent_exploit(Agent &input_agent, Agent a, Agent b, Agent c, Agent d, Agent e, Agent f,double prob,char method,int mode,int Criterion);
+void agent_exploit(Agent &input_agent, Agent a, Agent b, Agent c, Agent d, Agent e, Agent f,double prob,char method,int mode,int Criterion,int condition,std::vector<double> &val);
 void agent_swap_interal_info(Agent &input_agent);
 void agent_explore_A_10(Agent &input_agent, vector<double> &val);
 void agent_explore_B_10(Agent &input_agent, vector<double> &val);
@@ -52,9 +53,11 @@ void matrix_fill_before(int id,vector<int> filler); //debugging
 void matrix_fill_after(int id,vector<int> filler);//debugging
 void matrix_print(vector<Agent> agent_array);//debugging
 void swap_species(Agent &input_agent,double& epsilon);
-void agent_exploit_weighted(Agent &input_agent, Agent a, Agent b, Agent c, Agent d, Agent e, Agent f,int mode,int Criterion);
-void agent_exploit_weighted_inverse(Agent &input_agent, Agent a, Agent b, Agent c, Agent d, Agent e, Agent f,int mode,int Criterion,double prob);
-//below are testing functions
+void agent_exploit_weighted(Agent &input_agent, Agent a, Agent b, Agent c, Agent d, Agent e, Agent f,int mode,int Criterion,int condition,std::vector<double> &val);
+void agent_exploit_weighted_inverse(Agent &input_agent, Agent a, Agent b, Agent c, Agent d, Agent e, Agent f,int mode,int Criterion,double prob,int condition);
+void agent_string_bitflip(Agent &input_agent,double prob,std::vector<double> &val);
+
+//Global connection swapping functions
 
 void agent_asymmetric_swap_global(int num,vector<Agent> &Agents,Agent &input_agent,int loop,int Criterion);//connections method swap, getting agents globally
 void agent_swap_hack_asymmetric_global(int num,vector<Agent> &Agents,Agent &input_agent, int Criterion);
