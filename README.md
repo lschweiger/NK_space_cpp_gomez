@@ -45,7 +45,7 @@ For asymmetric -C (Criterion) will be used as the cut of number but strictly les
 All agents will attempt to exploit by checking all connections and comparing scores, if a neighbour is better, it will take both the string and score from that neighbour. A flag is set if an agent is able to exploit if not said agent will then explore.<br />
 
 **Agent explore**:<br />
-Any agent that did not exploit meaning of all neighbours it has the best score, the agent will now attempt to explore. There are 4  sub-functions that get randomly called.<br />
+Any agent that did not exploit, meaning of all it's neighbours the agent itself has the best score, the agent will now attempt to explore. There are 4  sub-functions that get called every round randomly.<br />
 - random_0: randomly selects a bit in bits of the string and flips it to 0/1.
 - random_1: randomly selects a bit in bits of the string and flips it to 1.
 - explore_flip: randomly selects a even/odd bit in the string and flips it.
@@ -70,5 +70,5 @@ There are 4 search heuristics that can be performed that are randomly assigned f
 - agent_explore_random_0: a bit randomly chosen in the string will be flipped to a Zero
 - agent_explore_random_1: a bit randomly chosen in the string will be flipped to a One
 - agent_explore_flip: a bit randomly chosen in the string will be flipped from what is was to the other 0 to 1 or 1 to 0.
-- agent_explore_shuffle: the string will be partitioned into two parts first half and second half,
-and two numbers will be chosen from from each half. the agent then permute the string in between the chosen numbers. i.e if 3 and 8 are chosen all bits in the string from 3 to 8 and only that range will have the bit value shuffle. 
+- agent_explore_shuffle: The current string will be sampled from, with at least 2 index locations to create a substring. The agent then rotates the values of the selected index locations to the right with looping around. Once complete the substring is inserted back into the in the original index locations with the new rotated values.
+i.e if 3 ,5, 8 chosen then the value at 3 is moved to 5, 5 to 8 and 8 to 3. once place back into the full string 3 will have the value of 8, 5 will have 3's value'and , 8 will have 5's value.
