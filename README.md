@@ -70,5 +70,5 @@ There are 4 search heuristics that can be performed that are randomly assigned f
 - agent_explore_random_0: a bit randomly chosen in the string will be flipped to a Zero
 - agent_explore_random_1: a bit randomly chosen in the string will be flipped to a One
 - agent_explore_flip: a bit randomly chosen in the string will be flipped from what is was to the other 0 to 1 or 1 to 0.
-- agent_explore_shuffle: The current string will be sampled from, with at least 2 index locations to create a substring. The agent then rotates the values of the selected index locations to the right with looping around. Once complete the substring is inserted back into the in the original index locations with the new rotated values.
+- agent_explore_shuffle: The current string will be sampled from, with at least 2 index locations to create a substring. The agent then rotates the values of the selected index locations to the right with looping around. Once complete the substring is inserted back into the original index locations with the new rotated values.
 i.e if 3 ,5, 8 chosen then the value at 3 is moved to 5, 5 to 8 and 8 to 3. once place back into the full string 3 will have the value of 8, 5 will have 3's value'and , 8 will have 5's value.
