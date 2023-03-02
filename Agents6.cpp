@@ -238,6 +238,10 @@ int matrix[agentcounta][agentcounta]={};
         if(mode==9) agent_minority_status_merit(input_agent,a,b,c,d,e,f,Criterion);
         //cout<<"minority status "<<input_agent.minority<<endl;
         //score update
+        /*
+        temscore starts out as the input agent(meaning the current agent it focused on) then updates temscore if the connection's score is better, and will only update if the other connections are better
+        will also copy connections string as well
+        */
         int target_id=-1;
         double diffscore=0.0;
         if (temscore < a.score) {
@@ -335,7 +339,7 @@ int matrix[agentcounta][agentcounta]={};
             input_agent.flag = 0;
         }
     }
-    void Agent::agent_explore_A_10(Agent &input_agent, const vector<double> &val){
+    void Agent::agent_explore_A_10(Agent &input_agent, const vector<double> &val){// randomly swaps locations selected from the uniform dist declared below
         std::uniform_int_distribution<> randm(0, 6);
         std::random_device rdm;
         std::mt19937 gen(rdm());
@@ -363,7 +367,7 @@ int matrix[agentcounta][agentcounta]={};
         randm.reset();
     }
 
-    void Agent::agent_explore_B_10(Agent &input_agent, const vector<double> &val){
+    void Agent::agent_explore_B_10(Agent &input_agent, const vector<double> &val){ //randomly swaps locations selected from the uniform dist declared below
         std::uniform_int_distribution<> randm(7, 14);
         std::random_device rdm;
         std::mt19937 gen(rdm());
@@ -391,7 +395,7 @@ int matrix[agentcounta][agentcounta]={};
         randm.reset();
     }
 
-    void Agent::agent_explore_A_even(Agent &input_agent, const vector<double> &val){
+    void Agent::agent_explore_A_even(Agent &input_agent, const vector<double> &val){ //randomly swaps the binary digit 1 or 0  at  location selected from the uniform dist declared multiplied by two to always make it even
         std::uniform_int_distribution<> randm(1, 7);
         std::random_device rdm;
         std::mt19937 gen(rdm());
@@ -419,7 +423,7 @@ int matrix[agentcounta][agentcounta]={};
         randm.reset();
     }
 
-    void Agent::agent_explore_B_odd(Agent &input_agent, const vector<double> &val){
+    void Agent::agent_explore_B_odd(Agent &input_agent, const vector<double> &val){ //randomly swaps locations selected from the uniform dist declared multiplied by two plus to always make it odd
         std::uniform_int_distribution<> randm(0, 6);
         std::random_device rdm;
         std::mt19937 gen(rdm());
@@ -447,7 +451,7 @@ int matrix[agentcounta][agentcounta]={};
         randm.reset();
     }
 
-    void Agent::agent_explore_A_swap(Agent &input_agent, const vector<double> &val){
+    void Agent::agent_explore_A_swap(Agent &input_agent, const vector<double> &val){ //randomly swaps the bit from location selected from the uniform dist declared below and location plus 1
         std::uniform_int_distribution<> randm(0, 13);
         std::random_device rdm;
         std::mt19937 gen(rdm());
@@ -455,7 +459,6 @@ int matrix[agentcounta][agentcounta]={};
         //cout<<random<<endl;
         //checks if flag is really -1
         if (input_agent.flag == -1) {
-            //keeps running until flag is not -1
             string temstring = input_agent.binarystring;
             char temp=temstring[random];
             temstring[random]=temstring[random+1];
@@ -472,7 +475,7 @@ int matrix[agentcounta][agentcounta]={};
         }
         randm.reset();
     }
-    void Agent::agent_explore_B_swap(Agent &input_agent, const vector<double> &val){
+    void Agent::agent_explore_B_swap(Agent &input_agent, const vector<double> &val){ //randomly swaps the bit from two locations selected from the uniform dists declared
         std::uniform_int_distribution<> randm(0, 13);
         std::uniform_int_distribution<> randm2(0, 13);
         std::random_device rdm;
@@ -502,7 +505,7 @@ int matrix[agentcounta][agentcounta]={};
         randm2.reset();
     }
 
-    void Agent::agent_explore_A_flip(Agent &input_agent, const vector<double> &val){
+    void Agent::agent_explore_A_flip(Agent &input_agent, const vector<double> &val){// flips the first 7 bits
         //cout<<random<<endl;
         //checks if flag is really -1
         if (input_agent.flag == -1) {
@@ -529,7 +532,7 @@ int matrix[agentcounta][agentcounta]={};
         }
     }
 
-    void Agent::agent_explore_B_flip(Agent &input_agent, const vector<double> &val){
+    void Agent::agent_explore_B_flip(Agent &input_agent, const vector<double> &val){// flips the last 8
         //cout<<random<<endl;
         //checks if flag is really -1
         if (input_agent.flag == -1) {
@@ -557,7 +560,7 @@ int matrix[agentcounta][agentcounta]={};
         }
     }
     
-    void Agent::agent_explore_random_1(Agent &input_agent, const vector<double> &val,std::vector<int> seq){
+    void Agent::agent_explore_random_1(Agent &input_agent, const vector<double> &val,std::vector<int> seq){// selects a random location and flips it to 1
         std::uniform_int_distribution<> randm(0, seq.size()-1);
         std::random_device rdm;
         std::mt19937 gen(rdm());
@@ -587,7 +590,7 @@ int matrix[agentcounta][agentcounta]={};
         randm.reset();
     }
 
-    void Agent::agent_explore_random_0(Agent &input_agent, const vector<double> &val,std::vector<int> seq){
+    void Agent::agent_explore_random_0(Agent &input_agent, const vector<double> &val,std::vector<int> seq){// selects a random location and flips it to 0
         std::uniform_int_distribution<> randm(0, seq.size()-1);
         std::random_device rdm;
         std::mt19937 gen(rdm());
@@ -614,7 +617,7 @@ int matrix[agentcounta][agentcounta]={};
         randm.reset();
     }
 
-    void Agent::agent_explore_flip(Agent &input_agent, const vector<double> &val,std::vector<int> seq){
+    void Agent::agent_explore_flip(Agent &input_agent, const vector<double> &val,std::vector<int> seq){ // selects a random location and flips it to the bit
         std::uniform_int_distribution<> randm(0, seq.size()-1);
         std::random_device rdm;
         std::mt19937 gen(rdm());
@@ -647,7 +650,7 @@ int matrix[agentcounta][agentcounta]={};
         randm.reset();
     }
 
-    void Agent::agent_explore_shuffle(Agent &input_agent, const vector<double> &val,std::vector<int> seq){
+    void Agent::agent_explore_shuffle(Agent &input_agent, const vector<double> &val,std::vector<int> seq){ // selects a size and creates a new sequence from the input seq and then shuffles the new sequence to create a new string of bits 
         //checks if flag is really -1
         //cout<<input_agent.species<<" <-species\n";
         //cout<<"here\n";
@@ -719,7 +722,7 @@ int matrix[agentcounta][agentcounta]={};
         }
     }
 
-    void Agent::agent_explore(Agent &input_agent, const vector<double> &val,int search) {
+    void Agent::agent_explore(Agent &input_agent, const vector<double> &val,int search) { //selects the correct function to explore based on species and search value
         // if agent with flag -1 will explore
         //cout<<search<<endl;
         if(input_agent.species=='A' && search==0) agent_explore_A_10(input_agent, val);
@@ -733,7 +736,7 @@ int matrix[agentcounta][agentcounta]={};
         
     }
 
-    void Agent::agent_explore_new(Agent &input_agent, const vector<double> &val,int Asearch,int Bsearch,std::vector<int> seq) {
+    void Agent::agent_explore_new(Agent &input_agent, const vector<double> &val,int Asearch,int Bsearch,std::vector<int> seq) {//Updated selects the correct function to explore based on species and search value
         // if agent with flag -1, will explore
         //cout<<Asearch<<" "<<Bsearch<<"\n";
         if(input_agent.species=='A' && Asearch==0) agent_explore_random_0(input_agent,val, seq);
@@ -747,9 +750,9 @@ int matrix[agentcounta][agentcounta]={};
         
     }
 
-    std::vector<int> Agent::pool_con(Agent input_agent,Agent a, Agent b, Agent c, Agent d,Agent e, Agent f){
+    std::vector<int> Agent::pool_con(Agent input_agent,Agent a, Agent b, Agent c, Agent d,Agent e, Agent f){// fills temp with all possible connections including duplicates, will also fill temp up simultaneously from the other 6 agents
         vector<int> temp(36);
-        for(int i=0;i<6;i++){// fills temp with all possible connections including duplicates, will also fill temp up simultaneously from the other 6 agents
+        for(int i=0;i<6;i++){
             temp[i]=a.connections[i];
                 //cout<<a.id<<"id "<<a.connections[i]<<" a con"<<endl;
             temp[6+i]=b.connections[i];

@@ -159,7 +159,7 @@ void AB_list_deseg(vector<char> &types){//creates list of A and B and randomly a
     }
 }
 
-void AB_list_seg(vector<char> &types){//creates list of A and B and randomly assigns one to an agent at the beginning of every new NK_Space
+void AB_list_seg(vector<char> &types){//creates list of A and B and assigns half to A and half to B to an agent at the beginning of every new NK_Space
     //vector<char> AB(::agentcounta);
     for (int i = 0; i < ::agentcounta; ++i) {
         if (i < (::agentcounta)/2) types[i] = 'A';
@@ -167,7 +167,7 @@ void AB_list_seg(vector<char> &types){//creates list of A and B and randomly ass
     }
 }
 
-void AB_list_permute(vector<char> &types,int inksp){
+void AB_list_permute(vector<char> &types,int inksp){// creates list of A and B, then shuffles, with the NKspace +1 as the seed
     std::mt19937 gen;
     gen.seed(inksp+1);
     //cout<<types.size()<<endl;
@@ -517,7 +517,7 @@ std::ios::sync_with_stdio(false);
     double mcount=0;
     vector<int> k_opts={1,3,5,10};
     //vector<int> k_opts={5};
-#pragma omp parallel for default(none) shared(end,searchm,::na,NKspacevals,NKspace_num,cout,prob,argc,condition,mode,method,::matrixa,k_opts,std::cin,::agentcounta,Criterion,score_vec,globaltest,special) firstprivate(max,avgscore,percuni,maxscore,maxround,minoritycount,avgscores,uniquesize,percentuni,NKspacescore,rounds,mcount,agent_array,type,nums,elts,same,diff,samespecies,tieswapped,counter_tieswapping) schedule(static,end/4)
+#pragma omp parallel for default(none) shared(end,searchm,::na,NKspacevals,NKspace_num,cout,prob,argc,condition,mode,method,::matrixa,k_opts,std::cin,::agentcounta,Criterion,score_vec,globaltest,special) firstprivate(max,avgscore,percuni,maxscore,maxround,minoritycount,avgscores,uniquesize,percentuni,NKspacescore,rounds,mcount,agent_array,type,nums,elts,same,diff,samespecies,tieswapped,counter_tieswapping) schedule(static,end/24)
     for(int inksp=NKspace_num;inksp<end;++inksp){
         
         for (int opts = 0; opts < k_opts.size(); ++opts)
