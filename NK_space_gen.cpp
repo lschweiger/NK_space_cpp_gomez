@@ -101,9 +101,9 @@ if (!file.is_open())
 	strings.close();
 }
 
-int loop=1000;
+int loop=10000;
 //creating and saving scores j<# is the number of spaces to create
-std::vector<int> k_opts={1,5,10,15};
+std::vector<int> k_opts={1,3,5,10};
 int start = 0;
 #pragma omp parallel for default(none) shared(k_opts,cout,nk,start,loop) firstprivate(v)
 	for (int j=start; j < loop; ++j)
